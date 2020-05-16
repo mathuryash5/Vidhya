@@ -26,7 +26,7 @@ def generate_sentence_embediing():
         title_uid_mapping[row["cord_uid"]] = row["title"]
     for index, row in df.iterrows():
         abstract_uid_mapping[row["cord_uid"]] = row["abstract"]
-    sent = r"Hello World. Yash is hot."
+    sent = "Hello World. Yash is hot."
     sentence_embedding = BioBERT.get_sentence_embeddings(sent)
 
 def vidhya_setup():

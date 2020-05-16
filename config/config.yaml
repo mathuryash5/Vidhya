@@ -21,7 +21,7 @@ data_dir: resources/data
 microsoft_data: microsoft
 microsoft_metadata: metadata.csv
 azure_container_name: covid19temp
-azure_storage_account_name: zureopendatastorage
+azure_storage_account_name: azureopendatastorage
 azure_storage_sas_token: sv=2019-02-02&ss=bfqt&srt=sco&sp=rlcup&se=2025-04-14T00:21:16Z&st=2020-04-13T16:21:16Z&spr=https&sig=JgwLYbdGruHxRYTpr5dxfJqobKbhGap8WUtKFadcivQ%3D
 
 pretrained_models_path: resources/pretrained_models

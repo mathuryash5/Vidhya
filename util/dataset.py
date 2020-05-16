@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from azure.storage.blob import BlockBlobService
 import os
 import logging
@@ -44,12 +46,15 @@ class DatasetUtils(object):
     def get_microsoft_metadata():
         data_filepath = Config.get_config("data_dir")
         metadata_filepath = Config.get_config("microsoft_data")
+        Path(os.path.join(data_filepath, metadata_filepath)).mkdir(parents=True, exist_ok=True)
         metadata_filename = Config.get_config("microsoft_metadata")
         metadata_location = os.path.join(data_filepath, metadata_filepath, metadata_filename)
         if os.path.exists(metadata_location):
             logging.info("Metadata already exists!")
         else:
             DatasetUtils.download_microsoft_metadata(metadata_filename, metadata_location)
+            logging.info("Metadata downloaded successfully")
         df = pd.read_csv(metadata_location)
         df = DatasetUtils.format_metadata(df)
+
         return df
