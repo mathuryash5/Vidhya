@@ -1,5 +1,5 @@
 import torch
-from transformers import BertTokenizer, BertModel
+from transformers import BertTokenizer, BertModel, AutoTokenizer, AutoModelWithLMHead, AutoModel, PretrainedConfig
 
 from config.config import Config
 import os
@@ -14,15 +14,17 @@ class BioBERT:
         model_name = Config.get_config("model_name")
         model_path = os.path.join(pretrained_models_path, model_name)
 
-        tokenizer = BertTokenizer.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained("./resources/pretrained_models/biobert-nli/")
 
-        model = BertModel.from_pretrained(model_name, output_hidden_states=True)
+        input_ids = tokenizer.encode(sentence)
+        input_ids = torch.LongTensor(input_ids)
 
-        input_ids = torch.tensor([tokenizer.encode(sentence)])
+        model = AutoModel.from_pretrained("./resources/pretrained_models/biobert-nli/")
 
-        # device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        # model = model.to(device)
-        # input_ids = input_ids.to(device)
+
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        model = model.to(device)
+        input_ids = input_ids.to(device)
 
         model.eval()
 
@@ -33,6 +35,6 @@ class BioBERT:
 
         hidden_states = out[2]
         sentence_embedding = torch.mean(hidden_states[-1], dim=1).squeeze()
-        logging.debug("Sentence embedding generated for sentence = {} shape = {}".format(sentence,
-                                                                                         sentence_embedding.shape))
+        logging.debug("Sentence embedding generated for sentence = {} shape = {}".format(sentence,-
+                                                                                         sentence_embedding.size()))
         return sentence_embedding
