@@ -33,6 +33,7 @@ abstract_key: abstract
 # Model Related Config
 pretrained_models_path: resources/pretrained_models
 model_name: biobert-nli
+embedding_size: 768
 
 # Embeddings Related Config
 embeddings_path: generated_embeddings

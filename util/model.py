@@ -31,12 +31,16 @@ class ModelUtils:
         :param paragraph: Input text.
         :return: Mean sentence embeddings.
         """
-        sentence_list = ModelUtils.sentence_tokenizer(paragraph)
-        sentence_embeddings_list = []
-        for sentence in sentence_list:
-            sentence_embeddings = LanguageModel.get_sentence_embeddings_from_sentence(sentence)
-            sentence_embeddings_list.append(sentence_embeddings)
-        mean_sentence_embeddings = torch.mean(torch.stack(sentence_embeddings_list), dim=0)
+        if paragraph is None:
+            tensor = torch.tensor((), dtype=torch.float64)
+            mean_sentence_embeddings = tensor.new_zeros(Config.get_config("embedding_size"))
+        else:
+            sentence_list = ModelUtils.sentence_tokenizer(paragraph)
+            sentence_embeddings_list = []
+            for sentence in sentence_list:
+                sentence_embeddings = LanguageModel.get_sentence_embeddings_from_sentence(sentence)
+                sentence_embeddings_list.append(sentence_embeddings)
+            mean_sentence_embeddings = torch.mean(torch.stack(sentence_embeddings_list), dim=0)
         logging.debug("Sentence embedding generated for paragraph = {} \n with tensor size = {}".
                       format(paragraph, mean_sentence_embeddings.size()))
         return mean_sentence_embeddings

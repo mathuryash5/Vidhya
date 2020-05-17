@@ -80,4 +80,5 @@ class DatasetUtils(object):
             DatasetUtils.download_microsoft_cord_19_dataset(microsoft_cord_19_dataset_filename, dataset_filepath)
         df = pd.read_csv(dataset_filepath)
         df = DatasetUtils.format_metadata(df)
+        df.fillna(None, inplace=True)
         return df
