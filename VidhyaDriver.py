@@ -18,23 +18,14 @@ from util.dataset import DatasetUtils
 TODO: Knowledge Graph workflow.
 """
 
-def generate_sentence_embediing():
-    df = DatasetUtils.get_microsoft_metadata()
-    title_uid_mapping = dict()
-    abstract_uid_mapping = dict()
-    for index, row in df.iterrows():
-        title_uid_mapping[row["cord_uid"]] = row["title"]
-    for index, row in df.iterrows():
-        abstract_uid_mapping[row["cord_uid"]] = row["abstract"]
-    sent = "Hello World. Yash is hot."
-    sentence_embedding = BioBERT.get_sentence_embeddings(sent)
 
 def vidhya_setup():
     Config.load_config()
     LoggingUtils.setup_logger()
 
+
 if __name__ == "__main__":
     vidhya_setup()
-    generate_sentence_embediing()
+    BioBERT.generate_and_store_embeddings()
     logger = logging.getLogger(__name__)
     logger.info("Test")

@@ -5,7 +5,6 @@ import os
 import logging
 import pandas as pd
 
-
 from config.config import Config
 
 
@@ -18,13 +17,14 @@ class DatasetUtils(object):
 
     @staticmethod
     def preview(text):
-        """Show only a preview of the text data."""
+        """Show only a preview of the text dataset."""
         return text[:30] + '...'
 
     @staticmethod
     def format_metadata(df):
         simple_schema = ['cord_uid', 'source_x', 'title', 'abstract', 'authors', 'full_text_file', 'url']
-        format_ = {'title': DatasetUtils.preview, 'abstract': DatasetUtils.preview, 'authors': DatasetUtils.preview, 'url': DatasetUtils.make_clickable}
+        format_ = {'title': DatasetUtils.preview, 'abstract': DatasetUtils.preview, 'authors': DatasetUtils.preview,
+                   'url': DatasetUtils.make_clickable}
         df[simple_schema].head().style.format(format_)
         return df
 
