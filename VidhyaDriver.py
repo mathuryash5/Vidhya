@@ -1,11 +1,10 @@
 # Driver utility
-import argparse
 import logging
 
 from config.config import Config
-from model.biobert import BioBERT
+from model.language_model import LanguageModel
 from util.logger import LoggingUtils
-from util.dataset import DatasetUtils
+from util.model import ModelUtils
 
 """
 1. Generate sentence embeddings for each abstract and paper title
@@ -22,10 +21,11 @@ TODO: Knowledge Graph workflow.
 def vidhya_setup():
     Config.load_config()
     LoggingUtils.setup_logger()
+    LanguageModel.load_model()
 
 
 if __name__ == "__main__":
     vidhya_setup()
-    BioBERT.generate_and_store_embeddings()
+    ModelUtils.generate_and_store_embeddings()
     logger = logging.getLogger(__name__)
     logger.info("Test")
