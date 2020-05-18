@@ -34,22 +34,9 @@ class LanguageModel:
         :param sentence: Input sentence.
         :return: Sentence level embeddings.
         """
-        #pretrained_models_path = Config.get_config("pretrained_models_path")
-        #model_name = Config.get_config("model_name")
-        #model_path = os.path.join(pretrained_models_path, model_name)
-
-        #tokenizer = AutoTokenizer.from_pretrained(model_path)
-
         input_ids = LanguageModel.tokenizer.encode(sentence)
         input_ids = torch.LongTensor(input_ids)
-
-        #model = AutoModel.from_pretrained(model_path)
-
-        #device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        #model = model.to(device)
         input_ids = input_ids.to(LanguageModel.device)
-
-        #model.eval()
 
         input_ids = input_ids.unsqueeze(0)
 
@@ -58,6 +45,4 @@ class LanguageModel:
 
         hidden_states = out[2]
         sentence_embeddings = torch.mean(hidden_states[-1], dim=1).squeeze()
-        logging.debug("Sentence embedding generated for sentence = {} \n with tensor size = {}".
-                      format(sentence, sentence_embeddings.size()))
         return sentence_embeddings

@@ -1,5 +1,6 @@
 # Driver utility
 import logging
+from multiprocessing import freeze_support
 
 from config.config import Config
 from model.language_model import LanguageModel
@@ -25,6 +26,7 @@ def vidhya_setup():
 
 
 if __name__ == "__main__":
+    freeze_support()
     vidhya_setup()
     ModelUtils.generate_and_store_embeddings()
     logger = logging.getLogger(__name__)

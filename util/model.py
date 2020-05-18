@@ -8,9 +8,25 @@ import torch
 from config.config import Config
 from model.language_model import LanguageModel
 from util.dataset import DatasetUtils
+from concurrent.futures import ProcessPoolExecutor
+import concurrent
+
+from util.logger import LoggingUtils
 
 
 class ModelUtils:
+
+    @staticmethod
+    def initializer():
+        Config.load_config()
+        LoggingUtils.setup_logger()
+        LanguageModel.load_model()
+
+    @staticmethod
+    def multiprocessing(func, args, workers):
+        with ProcessPoolExecutor(initializer=ModelUtils.initializer, max_workers=workers) as ex:
+            res = ex.map(func, args)
+        return list(res)
 
     @staticmethod
     def get_sentence_embeddings_from_dict(uid_sentence_mapping_dict):
@@ -20,8 +36,8 @@ class ModelUtils:
         :return: Dict with UID as key and sentence embeddings as value.
         """
         uid_sentence_embeddings_mapping_dict = dict()
-        for uid, text in uid_sentence_mapping_dict.items():
-            uid_sentence_embeddings_mapping_dict[uid] = ModelUtils.get_sentence_embeddings_from_paragraph(text)
+        uid, text = uid_sentence_mapping_dict
+        uid_sentence_embeddings_mapping_dict[uid] = ModelUtils.get_sentence_embeddings_from_paragraph(text)
         return uid_sentence_embeddings_mapping_dict
 
     @staticmethod
@@ -31,7 +47,7 @@ class ModelUtils:
         :param paragraph: Input text.
         :return: Mean sentence embeddings.
         """
-        if paragraph is None:
+        if paragraph == "":
             tensor = torch.tensor((), dtype=torch.float64)
             mean_sentence_embeddings = tensor.new_zeros(Config.get_config("embedding_size"))
         else:
@@ -89,12 +105,16 @@ class ModelUtils:
         else:
             # Read UID and title from dataset
             uid_title_mapping_dict = dict()
+            count = 0
             for index, row in dataset_df.iterrows():
                 uid_title_mapping_dict[row[Config.get_config("cord_uid_key")]] = row[Config.get_config("title_key")]
+                count += 1
+                if count == 20:
+                    break
             logging.info("Generating sentence embeddings for Microsoft CORD-19 dataset titles ...")
-            uid_title_embedding_mapping_dict = ModelUtils. \
-                get_sentence_embeddings_from_dict(uid_title_mapping_dict)
-            LanguageModel.write_to_pickle_file(title_embeddings_path, uid_title_embedding_mapping_dict)
+            uid_title_embedding_mapping_dict = ModelUtils.multiprocessing(ModelUtils. \
+                get_sentence_embeddings_from_dict, uid_title_mapping_dict.items(), 4)
+            ModelUtils.write_to_pickle_file(title_embeddings_path, uid_title_embedding_mapping_dict)
             logging.info("Generating sentence embeddings for Microsoft CORD-19 dataset titles completed...")
 
         if os.path.exists(abstract_embeddings_path):
@@ -108,5 +128,5 @@ class ModelUtils:
             logging.info("Generating sentence embeddings for Microsoft CORD-19 dataset abstracts ...")
             uid_abstract_embedding_mapping_dict = ModelUtils. \
                 get_sentence_embeddings_from_dict(uid_abstract_mapping_dict)
-            LanguageModel.write_to_pickle_file(abstract_embeddings_path, uid_abstract_embedding_mapping_dict)
+            ModelUtils.write_to_pickle_file(abstract_embeddings_path, uid_abstract_embedding_mapping_dict)
             logging.info("Generating sentence embeddings for Microsoft CORD-19 dataset abstracts completed...")
