@@ -44,3 +44,6 @@ sentence_embeddings_filename: sentence_embeddings.pkl
 # SpaCy transformer_models
 spacy_model_name: en_core_web_sm
 
+# Vidhya UI resources
+templates_dir: templates
+static_dir: static
