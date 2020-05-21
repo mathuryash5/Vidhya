@@ -47,13 +47,16 @@ def get_about_us():
 def get_paper_recommeder_system_search_result():
     user_input = request.form
     user_input_search_string = user_input["paper-recommender-system-user-input-string"]
-    user_input_number_of_results = user_input["paper-recommender-system-user-input-result-count"]
-    user_title_weight = int(user_input["paper-recommender-system-user-input-result-weight"])
+    user_input_number_of_results = int(user_input["paper-recommender-system-user-input-result-count"])
+    user_title_weight = int(user_input["paper-recommender-system-user-input-result-weight"])/100
     app.logger.error("user_input_search_string = {}".format(user_input_search_string))
     app.logger.error("user_input_number_of_results = {}".format(user_input_number_of_results))
     app.logger.error("user_title_weight = {}".format(user_title_weight))
-    df = pd.DataFrame(data=[["87%","Coronavirus eruption in Wuhan, China","https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_html.html"],["83.4%","Rhinovirus", "https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_html.html"]])
-    df.columns = ["Similarity", "Title", "Link"]
+    # df = pd.DataFrame(data=[["87%","Coronavirus eruption in Wuhan, China","https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_html.html"],["83.4%","Rhinovirus", "https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_html.html"]])
+    # df.columns = ["Similarity", "Title", "Link"]
+    df = ModelUtils.get_similar_papers_wrappers(user_input_search_string, title_weights=user_title_weight,
+                                                abstract_weights=1-user_title_weight,
+                                                number_of_similar_papers=user_input_number_of_results)
     paper_recommender_search_result = df.to_html(classes=["table", "table-bordered", "table-light", "table-hover"],
     index=False)
     return render_template("index.html", paper_recommender_search_result=paper_recommender_search_result)
@@ -73,15 +76,12 @@ TODO: Knowledge Graph workflow.
 def vidhya_setup():
     Config.load_config()
     LoggingUtils.setup_logger()
-    # LanguageModel.load_model()
+    LanguageModel.load_model()
 
 
 if __name__ == "__main__":
     vidhya_setup()
-    ModelUtils.generate_and_store_embeddings()
-    # ModelUtils.get_similar_papers_by_query_id("xqhn0vbp")
-    # df = DatasetUtils.get_microsoft_cord_19_dataset()
-    # DatasetUtils.get_papers_text(df)
+    # ModelUtils.generate_and_store_embeddings()
     logger = logging.getLogger(__name__)
     logger.info("Starting Vidhya ...")
     app.run()

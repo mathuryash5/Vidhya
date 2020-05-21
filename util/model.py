@@ -1,3 +1,4 @@
+import functools
 import logging
 import os
 import pickle
@@ -109,7 +110,6 @@ class ModelUtils:
                 uid_sentence_embedding_mapping[key] = LanguageModel.get_sentence_embeddings_from_sentence(sentence)
         return uid_sentence_embedding_mapping
 
-
     @staticmethod
     def generate_and_store_embeddings():
         """
@@ -162,7 +162,8 @@ class ModelUtils:
         else:
             logging.info("Generating text embeddings for Microsoft CORD-19 dataset ....")
             files = os.listdir("resources/dataset/microsoft/paper_text")
-            uid_sentence_embedding_mapping_list = ModelUtils.multiprocessing(ModelUtils.generate_sentence_embeddings_from_file, files, 2)
+            uid_sentence_embedding_mapping_list = ModelUtils.multiprocessing(
+                ModelUtils.generate_sentence_embeddings_from_file, files, 2)
             uid_sentence_embedding_mapping_list = list(filter(None, uid_sentence_embedding_mapping_list))
             ModelUtils.write_to_pickle_file(sentence_embeddings_path, uid_sentence_embedding_mapping_list)
             logging.info("Generated text embeddings for Microsoft CORD-19 dataset ....")
@@ -200,6 +201,19 @@ class ModelUtils:
         return query_uid_embedding_mapping, corpus_uid_embedding_mapping
 
     @staticmethod
+    def make_clickable(val):
+        # target _blank to open new window
+        return '<a target="_blank" href="{}">{}</a>'.format(val, val)
+
+    @staticmethod
+    def negative_yellow(val, matching_sentences):
+        for sentence in matching_sentences:
+            if sentence.lower() in val.lower():
+                index = val.find(sentence)
+                end_index = index + len(sentence) + 1
+            return val[:index] + '<mask><b>' + val[index: end_index] + "</b></mask>" + val[end_index:]
+
+    @staticmethod
     def get_top_n_similar_papers(df, title_based_distances, abstract_based_distances, title_weights, abstract_weights,
                                  number_of_similar_papers):
         uid_average_distance_mapping = dict()
@@ -218,8 +232,9 @@ class ModelUtils:
             similar_paper_metadata = [uid, row['title'].to_list()[0], row['abstract'].to_list()[0],
                                       row['journal'].to_list()[0], row['url'].to_list()[0], round((1 - score) * 100, 4)]
             similar_papers.append(similar_paper_metadata)
-        headers = ["CORD UID", "Title", "Abstract", "Journal", "Match Score"]
-        df_similar_papers = pd.Dataframe(similar_papers, columns=headers)
+        headers = ["CORD UID", "Title", "Abstract", "Journal", "URL", "Match Score"]
+        df_similar_papers = pd.DataFrame(similar_papers, columns=headers)
+        df_similar_papers.style.format({'URL': ModelUtils.make_clickable})
         return df_similar_papers
 
     @staticmethod
@@ -235,8 +250,8 @@ class ModelUtils:
 
         abstract_embeddings_path = os.path.join(resources_folder, embeddings_folder, abstract_embeddings_filename)
         uid_abstract_embeddings_dict = ModelUtils.load_generated_embeddings(abstract_embeddings_path)
-        abstract_based_distances = ModelUtils.get_similar_sentences([query_embedding.numpy(),
-                                                                     uid_abstract_embeddings_dict])
+        abstract_based_distances = ModelUtils.get_similar_sentences([query_embedding.numpy()],
+                                                                    uid_abstract_embeddings_dict)
 
         df_similar_papers = ModelUtils.get_top_n_similar_papers(df, title_based_distances, abstract_based_distances,
                                                                 title_weights, abstract_weights,
@@ -276,34 +291,13 @@ class ModelUtils:
             return ModelUtils.get_similar_papers_by_query(query, df, title_weights, abstract_weights,
                                                           number_of_similar_papers)
         else:
-            row = df[df['title'].lower() == query.lower()]
+            row = df[df['title'].str.lower() == query.lower()]
             query_uid = row['cord_uid'].to_list()[0]
             return ModelUtils.get_similar_papers_by_query_id(query_uid, df, title_weights, abstract_weights,
                                                              number_of_similar_papers)
 
     @staticmethod
-    def get_top_n_similar_answers(sentence_distances, number_of_answers):
-        return
-        for uid, sentence_distance_mapping in sentence_distances:
-            sentence_distance_mapping_list = [(sentence, distance.tolist()[0]) for sentence, distance in
-                                              sentence_distance_mapping.items()]
-        sorted_uid_average_distance_mapping = sorted(uid_average_distance_mapping,
-                                                     key=lambda x: x[1])
-
-        sorted_uid_average_distance_mapping = sorted_uid_average_distance_mapping[:number_of_similar_papers]
-        similar_papers = []
-        for uid, score in sorted_uid_average_distance_mapping:
-            row = df[df['cord_uid'] == uid]
-            similar_paper_metadata = [uid, row['title'].to_list()[0], row['abstract'].to_list()[0],
-                                      row['journal'].to_list()[0], row['url'].to_list()[0], round((1 - score) * 100, 4)]
-            similar_papers.append(similar_paper_metadata)
-        headers = ["CORD UID", "Title", "Abstract", "Journal", "Match Score"]
-        df_similar_papers = pd.Dataframe(similar_papers, columns=headers)
-        return df_similar_papers
-        pass
-
-    @staticmethod
-    def get_answer_similarity(query):
+    def get_answer_similarity(query, number_of_answers=10):
         resources_folder = Config.get_config("resources_dir")
         embeddings_folder = Config.get_config("embeddings_path")
         sentence_embeddings_filename = Config.get_config("sentence_embedding_filename")
@@ -311,11 +305,43 @@ class ModelUtils:
 
         query_embedding = LanguageModel.get_sentence_embeddings_from_sentence(query)
         all_sentences_embeddings = ModelUtils.load_generated_embeddings(sentence_embeddings_path)
-        all_sentence_distances = dict()
-        for uid, sentence_embedding_mapping in all_sentences_embeddings.mapping():
-            all_sentence_distances[uid] = ModelUtils.get_similar_sentences([query_embedding.numpy()],
-                                                                           all_sentences_embeddings)
+        all_sentence_distances = ModelUtils.get_similar_sentences([query_embedding.numpy()],
+                                                                  all_sentences_embeddings)
+        df = ModelUtils.get_top_n_similar_answers(all_sentence_distances, number_of_answers)
+        return df
 
     @staticmethod
-    def get_answers(query, number_of_answers=10):
-        pass
+    def get_top_n_similar_answers(all_sentence_distances, number_of_answers):
+
+        all_sentence_distances_mapping = [(uid, distance.tolist()[0]) for uid, distance in
+                                          all_sentence_distances.items()]
+        sorted_all_sentence_distances_mapping = sorted(all_sentence_distances_mapping,
+                                                       key=lambda x: x[1])
+
+        df = DatasetUtils.get_microsoft_cord_19_dataset()
+        sorted_all_sentence_distances_mapping = sorted_all_sentence_distances_mapping[:number_of_answers]
+        similar_papers = []
+        matching_sentences = []
+        for key, score in sorted_all_sentence_distances_mapping:
+            uid_sentence = key.split("$%%$")
+            uid = uid_sentence[0]
+            sentence = uid_sentence[1]
+            matching_sentences.append(sentence)
+            row = df[df['cord_uid'] == uid]
+            with open("resources/dataset/microsoft/paper_text/" + uid + ".txt") as file:
+                data = file.read()
+            sentences = ModelUtils.sentence_tokenizer(data)
+            sentence_index = sentences.index(sentence)
+            region_range = 2
+            region_of_interest = sentences[sentence_index - region_range: sentence_index + region_range + 1]
+            paragraph = " ".join(region_of_interest)
+            similar_paper_metadata = [uid, row['title'].to_list()[0], row['abstract'].to_list()[0], paragraph,
+                                      row['journal'].to_list()[0], row['url'].to_list()[0], round((1 - score) * 100, 4)]
+            similar_papers.append(similar_paper_metadata)
+
+        headers = ["CORD UID", "Title", "Abstract", "Relevant Context", "Journal", "URL", "Match Score"]
+        df_similar_papers = pd.DataFrame(similar_papers, columns=headers)
+        df_similar_papers.style.format({'URL': ModelUtils.make_clickable})
+        curried_formatter = functools.partial(ModelUtils.negative_yellow, matching_sentences=matching_sentences)
+        df_similar_papers.style.format({'Relevant Context': curried_formatter})
+        return df_similar_papers
