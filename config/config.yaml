@@ -43,3 +43,6 @@ abstract_embeddings_filename: abstract_embeddings.pkl
 # SpaCy model
 spacy_model_name: en_core_web_sm
 
+# Vidhya UI resources
+templates_dir: templates
+static_dir: static

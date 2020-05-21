@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+  <html lang="en">
+    <head>
+
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+      <!-- Insert Vidhya tagline in the title -->
+      <title>Vidhya</title>
+
+      <!-- Bootstrap JS -->
+      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+      <!-- Bootstrap CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+      <!-- Fontawesome CSS -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      
+      <!-- Custom CSS style -->
+      <link href= "{{ url_for('static',filename='styles/style.css') }}" rel="stylesheet">
+      <!-- Custom JS script -->
+      <script src="{{url_for('static', filename='scripts/main.js')}}"></script> 
+
+    </head>
+
+    <body>
+
+      <!-- Entire div container -->
+      <div class="d-flex" id="main-wrapper">
+
+      <!-- Sidebar navigation -->
+      <div class="border-right border-dark" id="sidebar-wrapper">
+        <div class="sidebar-heading">Vidhya</div>
+        <div class="list-group list-group-flush">
+          <a href="http://127.0.0.1:5000/knowledge-graph-system" class="list-group-item list-group-item-action">Knowledge Graph</a>
+          <a href="http://127.0.0.1:5000/paper-recommender-system" class="list-group-item list-group-item-action">Paper Recommender</a>
+          <a href="http://127.0.0.1:5000/q-a-system" class="list-group-item list-group-item-action">Q/A System</a>
+          <a href="http://127.0.0.1:5000/about-us" class="list-group-item list-group-item-action">About us</a>
+        </div>
+      </div>
+
+      <!-- Page Content -->
+      <div id="page-content-wrapper">
+
+        <!-- Homepage -->
+        <div class="dynamic-content" id="homepage">
+          <div class="search-bar-heading col-lg-12 text-center mt-5">
+            <h1>Homepage</h1>
+          </div>
+        </div>
+        
+        <!-- Knowledge Graph System -->
+        <div class="dynamic-content" id="knowledge-graph-system">
+          <div class="search-bar-heading col-lg-12 text-center mt-5">
+            <h1>Knowledge Graph System</h1>
+          </div>
+        </div>
+
+        <!-- Paper Recommender System -->
+        <div class="dynamic-content" id="paper-recommender-system">
+          <div class="search-bar-heading col-lg-12 text-center mt-5" id="paper-recommender-system-heading">
+            <h1>Paper Recommender System</h1>
+          </div>
+
+          <!-- Paper Recommender System search bar-->
+          <div class="col-md-4 offset-md-4 mt-5 border pt-3" id="paper-recommender-system-search-bar-border-div">
+            <form action="/paper-recommender-system/search" method="POST">
+              <div class="input-group mb-3" id="paper-recommender-system-search-bar-div">
+                <input type="text" class="form-control" id="paper-recommender-system-search-bar-user-input-string" name="paper-recommender-system-user-input-string" placeholder="Search by title" required>
+                <div class="input-group-append" id="paper-recommender-system-search-bar-submit-button-div">
+                  <button type="submit" id="paper-recommender-system-search-bar-submit-button">
+                    <i class="fa fa-search"></i>
+                  </button>
+                </div>
+                <div class="input-group-append" id="paper-recommender-system-search-bar-dropdown-div">
+                  <div class="dropdown dropdown-lg" id="paper-recommender-system-search-bar-dropdown-menu-div">
+                    <button type="button" class="btn btn-primary" id="paper-recommender-system-search-bar-dropdown-button" data-toggle="dropdown" aria-expanded="false">
+                      <i class="fa fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right" id="paper-recommender-system-search-bar-dropdown-menu-right-div" role="menu">
+                          <div class="form-group" id="paper-recommender-system-search-bar-dropdown-menu-form-div">
+                            <label for="contain">Weights</label>
+                            <div class="dropdown-divider"></div>
+                            <div class="slidecontainer" id="paper-recommender-system-search-bar-dropdown-menu-slider-div">
+                              <input type="range" min="1" max="100" value="50" class="slider" id="paper-recommender-system-search-bar-dropdown-menu-slider" name="paper-recommender-system-user-input-result-weight">
+                              <p>Title Weightage: <span id="paper-recommender-system-search-bar-dropdown-menu-slider-title-weight"></span></p>
+                              <p>Abstract Weightage: <span id = "paper-recommender-system-search-bar-dropdown-menu-slider-abstract-weight"></span></p>
+                            </div>
+                          </div>
+                          <div class="dropdown-divider"></div>
+                          <div class="form-group" id="paper-recommender-system-search-bar-dropdown-menu-result-count-div">
+                            <label for="contain">Number of results</label>
+                            <input class="form-control" type="text" id="paper-recommender-system-search-bar-dropdown-menu-result-count" name="paper-recommender-system-user-input-result-count" value="10"/>
+                          </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Paper Recommender System search result -->
+          <div id="paper-recommender-system-result">
+            {{ paper_recommender_search_result | safe }}
+          </div>
+        </div>
+
+        <!-- Q/A System -->
+        <div class="dynamic-content" id="q-a-system">
+          <div class="search-bar-heading col-lg-12 text-center mt-5">
+            <h1>Q/A System</h1>
+          </div>
+        </div>
+
+        <!-- About us System -->
+        <div class="dynamic-content" id="about-us">
+          <div class="search-bar-heading col-lg-12 text-center mt-5">
+            <h1>About us</h1>
+          </div>
+        </div>
+
+      </div>
+  </body>
+</html>
