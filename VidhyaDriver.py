@@ -3,7 +3,8 @@ import logging
 from multiprocessing import freeze_support
 
 from config.config import Config
-from model.language_model import LanguageModel
+from transformer_models.language_model import LanguageModel
+from util.dataset import DatasetUtils
 from util.logger import LoggingUtils
 from util.model import ModelUtils
 
@@ -22,12 +23,14 @@ TODO: Knowledge Graph workflow.
 def vidhya_setup():
     Config.load_config()
     LoggingUtils.setup_logger()
-    LanguageModel.load_model()
+    # LanguageModel.load_model()
 
 
 if __name__ == "__main__":
-    freeze_support()
     vidhya_setup()
     ModelUtils.generate_and_store_embeddings()
+    # ModelUtils.get_similar_papers_by_query_id("xqhn0vbp")
+    # df = DatasetUtils.get_microsoft_cord_19_dataset()
+    # DatasetUtils.get_papers_text(df)
     logger = logging.getLogger(__name__)
     logger.info("Test")

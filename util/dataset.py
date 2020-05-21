@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from pathlib import Path
@@ -82,3 +83,57 @@ class DatasetUtils(object):
         df = DatasetUtils.format_metadata(df)
         df.fillna("", inplace=True)
         return df
+
+    @staticmethod
+    def get_papers_text(df):
+        azure_storage_account_name = Config.get_config("azure_storage_account_name")
+        azure_storage_sas_token = Config.get_config("azure_storage_sas_token")
+
+        # Create a blob service
+        blob_service = BlockBlobService(account_name=azure_storage_account_name, sas_token=azure_storage_sas_token)
+        azure_container_name = Config.get_config("azure_container_name")
+
+        for index, row in df.iterrows():
+            if row['has_pdf_parse']:
+                text = ""
+                try:
+                    blob_name = '{0}/pdf_json/{1}.json'.format(row['full_text_file'],
+                                                           row['sha'])  # note the repetition in the path
+                    logging.debug("Full text blob for this entry: {}".format(blob_name))
+                    blob_as_json_string = blob_service.get_blob_to_text(container_name=azure_container_name,
+                                                                        blob_name=blob_name)
+                    data = json.loads(blob_as_json_string.content)
+                    text_and_metadata = data['body_text']
+                    for paragraph in text_and_metadata:
+                        text += paragraph['text']
+                except Exception as e:
+                    pass
+
+                filename = "resources/dataset/microsoft/paper_text/" + row['cord_uid'] + ".txt"
+                with open(filename, "w") as file:
+                    file.write(text)
+            elif row['has_pmc_xml_parse']:
+                text = ""
+                # construct path to blob containing full text
+                try:
+                    blob_name = '{0}/pmc_json/{1}.xml.json'.format(row['full_text_file'], row[
+                        'pmcid'])  # note the repetition in the path
+                    logging.debug("Full text blob for this entry: {}".format(blob_name))
+                    blob_as_json_string = blob_service.get_blob_to_text(container_name=azure_container_name, blob_name=blob_name)
+                    data = json.loads(blob_as_json_string.content)
+                    text_and_metadata = data['body_text']
+                    for paragraph in text_and_metadata:
+                        text += paragraph['text']
+                except Exception as e:
+                    pass
+                filename = "resources/dataset/microsoft/paper_text/" + row['cord_uid'] + ".txt"
+                with open(filename, "w") as file:
+                    file.write(text)
+            else:
+                text = ""
+                filename = "resources/dataset/microsoft/paper_text/" + row['cord_uid'] + ".txt"
+                with open(filename, "w") as file:
+                    file.write(text)
+
+
+

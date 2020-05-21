@@ -15,7 +15,7 @@ class LanguageModel:
 
     @staticmethod
     def load_model():
-        logging.debug("Initializing model")
+        logging.debug("Initializing transformer_models")
         pretrained_models_path = Config.get_config("pretrained_models_path")
         model_name = Config.get_config("model_name")
         model_path = os.path.join(pretrained_models_path, model_name)

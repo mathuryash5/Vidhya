@@ -39,7 +39,8 @@ embedding_size: 768
 embeddings_path: generated_embeddings
 title_embeddings_filename: title_embeddings.pkl
 abstract_embeddings_filename: abstract_embeddings.pkl
+sentence_embeddings_filename: sentence_embeddings.pkl
 
-# SpaCy model
+# SpaCy transformer_models
 spacy_model_name: en_core_web_sm
 
