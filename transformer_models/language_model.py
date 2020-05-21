@@ -22,7 +22,7 @@ class LanguageModel:
 
         LanguageModel.tokenizer = AutoTokenizer.from_pretrained(model_path)
         LanguageModel.model = AutoModel.from_pretrained(model_path)
-        LanguageModel.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        LanguageModel.device = 'cpu'
 
         LanguageModel.model = LanguageModel.model.to(LanguageModel.device)
         LanguageModel.model.eval()

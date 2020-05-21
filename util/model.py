@@ -3,6 +3,7 @@ import os
 import pickle
 
 import spacy
+import re
 import torch
 
 from config.config import Config
@@ -27,6 +28,12 @@ class ModelUtils:
         with ProcessPoolExecutor(initializer=ModelUtils.initializer, max_workers=workers) as ex:
             res = ex.map(func, args)
         return list(res)
+
+    @staticmethod
+    def format_abstract(string):
+        abstract_pattern = re.compile(re.escape('abstract'), re.IGNORECASE)
+        return abstract_pattern.sub(' Abstract ', string)
+
 
     @staticmethod
     def get_sentence_embeddings_from_dict(uid_sentence_mapping_dict):
@@ -99,18 +106,15 @@ class ModelUtils:
         title_embeddings_path = os.path.join(resources_dir, embeddings_path, title_embeddings_filename)
         abstract_embeddings_path = os.path.join(resources_dir, embeddings_path, abstract_embeddings_filename)
         dataset_df = DatasetUtils.get_microsoft_cord_19_dataset()
-
+        dataset_df['title'].map(ModelUtils.format_abstract)
+        dataset_df['abstract'].map(ModelUtils.format_abstract)
         if os.path.exists(title_embeddings_path):
             logging.info("Microsoft CORD-19 dataset title embeddings have already been generated.")
         else:
             # Read UID and title from dataset
             uid_title_mapping_dict = dict()
-            count = 0
             for index, row in dataset_df.iterrows():
                 uid_title_mapping_dict[row[Config.get_config("cord_uid_key")]] = row[Config.get_config("title_key")]
-                count += 1
-                if count == 20:
-                    break
             logging.info("Generating sentence embeddings for Microsoft CORD-19 dataset titles ...")
             uid_title_embedding_mapping_dict = ModelUtils.multiprocessing(ModelUtils. \
                 get_sentence_embeddings_from_dict, uid_title_mapping_dict.items(), 4)
@@ -126,7 +130,7 @@ class ModelUtils:
                 uid_abstract_mapping_dict[row[Config.get_config("cord_uid_key")]] = row[
                     Config.get_config("abstract_key")]
             logging.info("Generating sentence embeddings for Microsoft CORD-19 dataset abstracts ...")
-            uid_abstract_embedding_mapping_dict = ModelUtils. \
-                get_sentence_embeddings_from_dict(uid_abstract_mapping_dict)
+            uid_abstract_embedding_mapping_dict = ModelUtils.multiprocessing(ModelUtils. \
+                get_sentence_embeddings_from_dict, uid_abstract_mapping_dict.items(), 4)
             ModelUtils.write_to_pickle_file(abstract_embeddings_path, uid_abstract_embedding_mapping_dict)
             logging.info("Generating sentence embeddings for Microsoft CORD-19 dataset abstracts completed...")
