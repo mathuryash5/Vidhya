@@ -81,7 +81,7 @@ def vidhya_setup():
 
 if __name__ == "__main__":
     vidhya_setup()
-    # ModelUtils.generate_and_store_embeddings()
+    ModelUtils.generate_and_store_embeddings()
     logger = logging.getLogger(__name__)
     logger.info("Starting Vidhya ...")
-    app.run()
+    # app.run()

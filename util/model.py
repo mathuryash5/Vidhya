@@ -88,6 +88,7 @@ class ModelUtils:
         """
         sentence_list = []
         nlp = spacy.load(Config.get_config("spacy_model_name"))
+        nlp.max_length = 10030000
         doc = nlp(string)
         for index, token in enumerate(doc.sents):
             sentence_list.append(token.text)
@@ -95,20 +96,27 @@ class ModelUtils:
 
     @staticmethod
     def generate_sentence_embeddings_from_file(filename):
-        filepath = "resources/dataset/microsoft/paper_text/" + filename
-        with open(filepath, "r") as file:
+        filepath = "resources\\dataset\\microsoft\\paper_text\\" + filename
+        with open(filepath, "r", encoding="utf8") as file:
             data = file.read()
-        uid_sentence_embedding_mapping = dict()
+            file.close()
+        ret_list = []
         if data == "":
             logging.debug("File : {} does not contain any content. Skipping file".format(filename))
-            return uid_sentence_embedding_mapping
+            return ret_list
         else:
-
+            logging.info("Sent tokenize")
             sentence_list = ModelUtils.sentence_tokenizer(data)
+            logging.info("Sent tokenize over")
+            key_sentence_mapping = []
             for sentence in sentence_list:
                 key = filename[:-4] + "$%%$" + sentence
-                uid_sentence_embedding_mapping[key] = LanguageModel.get_sentence_embeddings_from_sentence(sentence)
-        return uid_sentence_embedding_mapping
+                key_sentence_mapping.append([key, sentence])
+            ret_list = ModelUtils.multiprocessing(LanguageModel.get_sentence_embedding_dict_from_sentence,
+                                                                             key_sentence_mapping, 2)
+            logging.debug("File : {} generated embedding".format(filename))
+
+        return ret_list
 
     @staticmethod
     def generate_and_store_embeddings():
@@ -161,12 +169,19 @@ class ModelUtils:
             logging.info("Microsoft CORD-19 dataset sentence embeddings have already been generated")
         else:
             logging.info("Generating text embeddings for Microsoft CORD-19 dataset ....")
-            files = os.listdir("resources/dataset/microsoft/paper_text")
-            uid_sentence_embedding_mapping_list = ModelUtils.multiprocessing(
-                ModelUtils.generate_sentence_embeddings_from_file, files, 2)
+            files = os.listdir("resources\\dataset\\microsoft\\paper_text")
+            uid_sentence_embedding_mapping_list = []
+            uid_sentence_embedding_mapping_list.extend(ModelUtils.multiprocessing(
+                ModelUtils.generate_sentence_embeddings_from_file, files, 2))
+
+            # for file in files:
+            #     logging.debug("Call 1")
+            #     uid_sentence_embedding_mapping_list.extend(ModelUtils.generate_sentence_embeddings_from_file(file))
+            #     logging.debug("Call 2")
+            logging.info("Generated text embeddings for Microsoft CORD-19 dataset ....")
             uid_sentence_embedding_mapping_list = list(filter(None, uid_sentence_embedding_mapping_list))
             ModelUtils.write_to_pickle_file(sentence_embeddings_path, uid_sentence_embedding_mapping_list)
-            logging.info("Generated text embeddings for Microsoft CORD-19 dataset ....")
+
 
     @staticmethod
     def get_similar_sentences(query_embedding, corpus_embedding_dict):
