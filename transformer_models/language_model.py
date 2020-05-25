@@ -15,18 +15,21 @@ class LanguageModel:
 
     @staticmethod
     def load_model():
+        """
+        Loads the model, tokenizer and device.
+        """
         logging.debug("Initializing transformer_models")
-        pretrained_models_path = Config.get_config("pretrained_models_path")
-        model_name = Config.get_config("model_name")
+        pretrained_models_path = Config.get_config("pretrained_models_path_key")
+        model_name = Config.get_config("model_name_key")
         model_path = os.path.join(pretrained_models_path, model_name)
 
         LanguageModel.tokenizer = AutoTokenizer.from_pretrained(model_path)
         LanguageModel.model = AutoModel.from_pretrained(model_path)
-        LanguageModel.device = 'cpu'
-        #LanguageModel.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        LanguageModel.device = Config.get_config("cpu_device_key")
+        # LanguageModel.device = Config.get_config("cuda_device_key") if torch.cuda.is_available() \
+        #     else Config.get_config("cpu_device_key")
 
         LanguageModel.model = LanguageModel.model.to(LanguageModel.device)
-        logging.debug("Device = {}".format(LanguageModel.device))
         LanguageModel.model.eval()
 
     @staticmethod
@@ -49,6 +52,7 @@ class LanguageModel:
         sentence_embeddings = torch.mean(hidden_states[-1], dim=1).squeeze()
         return sentence_embeddings
 
+    # CHECK
     @staticmethod
     def get_sentence_embedding_dict_from_sentence(list_mapping):
         input_ids = LanguageModel.tokenizer.encode(list_mapping[1])
