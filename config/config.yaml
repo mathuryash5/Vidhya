@@ -41,6 +41,8 @@ sha_key: sha
 body_text_key: body_text
 text_key: text
 pmcid_key: pmcid
+journal_key: journal
+url_key: url
 
 # Model Related Config
 pretrained_models_path_key: resources/pretrained_models
@@ -59,8 +61,8 @@ sentence_embeddings_filename_key: sentence_embeddings
 spacy_model_name_key: en_core_web_sm
 
 # Vidhya UI resources
-templates_dir: templates
-static_dir: static
+templates_dir_key: templates
+static_dir_key: static
 
 # Paper recommender system df keys
 paper_recommender_system_df_abstract_key: Abstract
