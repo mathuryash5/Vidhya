@@ -3,6 +3,7 @@ import logging
 import os
 import pickle
 import re
+import traceback
 from concurrent.futures.process import ProcessPoolExecutor
 
 import numpy as np
@@ -16,7 +17,6 @@ from transformer_models.language_model import LanguageModel
 from util.dataset import DatasetUtils
 from util.logger import LoggingUtils
 
-import traceback
 
 class ModelUtils:
 
@@ -211,6 +211,8 @@ class ModelUtils:
                     print("Error occurred while generating sentence embeddings for File = {}. Skipping.".format(file))
                     traceback.print_exc()
 
+# Code Refactoring ---------
+
     @staticmethod
     def get_similar_sentences(query_embedding, corpus_embedding_dict):
         uid_distance_dict = {}
@@ -224,6 +226,11 @@ class ModelUtils:
 
     @staticmethod
     def load_generated_embeddings(path):
+        """
+        Loads pickle file content into a dict.
+        :param path: filepath.
+        :return: dict.
+        """
         with (open(path, "rb")) as file:
             data = pickle.load(file)
         result_dict = dict()
@@ -272,8 +279,8 @@ class ModelUtils:
         similar_papers = []
         for uid, score in sorted_uid_average_distance_mapping:
             row = df[df['cord_uid'] == uid]
-            similar_paper_metadata = [uid, row['title'].to_list()[0], row['abstract'].to_list()[0],
-                                      row['journal'].to_list()[0], row['url'].to_list()[0], round((1 - score) * 100, 4)]
+            similar_paper_metadata = [uid, row[Config.get_config("title_key")].to_list()[0], row[Config.get_config("abstract_key")].to_list()[0],
+                                      row[Config.get_config("journal_key")].to_list()[0], row[Config.get_config("url_key")].to_list()[0], round((1 - score) * 100, 4)]
             similar_papers.append(similar_paper_metadata)
         headers = ["CORD UID", "Title", "Abstract", "Journal", "URL", "Match Score"]
         df_similar_papers = pd.DataFrame(similar_papers, columns=headers)
@@ -282,10 +289,10 @@ class ModelUtils:
 
     @staticmethod
     def get_similar_papers_by_query(query, df, title_weights, abstract_weights, number_of_similar_papers):
-        resources_folder = Config.get_config("resources_dir")
-        embeddings_folder = Config.get_config("embeddings_path")
-        title_embeddings_filename = Config.get_config("title_embeddings_filename")
-        abstract_embeddings_filename = Config.get_config("abstract_embeddings_filename")
+        resources_folder = Config.get_config("resources_dir_key")
+        embeddings_folder = Config.get_config("embeddings_path_key")
+        title_embeddings_filename = Config.get_config("title_embeddings_filename_key")
+        abstract_embeddings_filename = Config.get_config("abstract_embeddings_filename_key")
         title_embeddings_path = os.path.join(resources_folder, embeddings_folder, title_embeddings_filename)
         uid_title_embeddings_dict = ModelUtils.load_generated_embeddings(title_embeddings_path)
         query_embedding = LanguageModel.get_sentence_embeddings_from_sentence(query)
@@ -303,10 +310,10 @@ class ModelUtils:
 
     @staticmethod
     def get_similar_papers_by_query_id(query_uid, df, title_weights, abstract_weights, number_of_similar_papers):
-        resources_folder = Config.get_config("resources_dir")
-        embeddings_folder = Config.get_config("embeddings_path")
-        title_embeddings_filename = Config.get_config("title_embeddings_filename")
-        abstract_embeddings_filename = Config.get_config("abstract_embeddings_filename")
+        resources_folder = Config.get_config("resources_dir_key")
+        embeddings_folder = Config.get_config("embeddings_path_key")
+        title_embeddings_filename = Config.get_config("title_embeddings_filename_key")
+        abstract_embeddings_filename = Config.get_config("abstract_embeddings_filename_key")
 
         title_embeddings_path = os.path.join(resources_folder, embeddings_folder, title_embeddings_filename)
         uid_title_embeddings_dict = ModelUtils.load_generated_embeddings(title_embeddings_path)
@@ -330,20 +337,20 @@ class ModelUtils:
     @staticmethod
     def get_similar_papers_wrappers(query, title_weights=0.5, abstract_weights=0.5, number_of_similar_papers=10):
         df = DatasetUtils.get_microsoft_cord_19_dataset()
-        if len(df[df['title'].str.lower() == query.lower()]) == 0:
+        if len(df[df[Config.get_config("title_key")].str.lower() == query.lower()]) == 0:
             return ModelUtils.get_similar_papers_by_query(query, df, title_weights, abstract_weights,
                                                           number_of_similar_papers)
         else:
-            row = df[df['title'].str.lower() == query.lower()]
-            query_uid = row['cord_uid'].to_list()[0]
+            row = df[df[Config.get_config("title_key")].str.lower() == query.lower()]
+            query_uid = row[Config.get_config("cord_uid_key")].to_list()[0]
             return ModelUtils.get_similar_papers_by_query_id(query_uid, df, title_weights, abstract_weights,
                                                              number_of_similar_papers)
 
     @staticmethod
     def get_answer_similarity(query, number_of_answers=10):
-        resources_folder = Config.get_config("resources_dir")
-        embeddings_folder = Config.get_config("embeddings_path")
-        sentence_embeddings_filename = Config.get_config("sentence_embedding_filename")
+        resources_folder = Config.get_config("resources_dir_key")
+        embeddings_folder = Config.get_config("embeddings_path_key")
+        sentence_embeddings_filename = Config.get_config("sentence_embedding_filename_key")
         sentence_embeddings_path = os.path.join(resources_folder, embeddings_folder, sentence_embeddings_filename)
 
         query_embedding = LanguageModel.get_sentence_embeddings_from_sentence(query)
@@ -365,12 +372,15 @@ class ModelUtils:
         sorted_all_sentence_distances_mapping = sorted_all_sentence_distances_mapping[:number_of_answers]
         similar_papers = []
         matching_sentences = []
+        resources_dir = Config.get_config("resources_dir_key")
+        dataset_dir = Config.get_config("dataset_key")
+        microsoft_dir = Config.get_config("microsoft_key")
         for key, score in sorted_all_sentence_distances_mapping:
-            uid_sentence = key.split("$%%$")
+            uid_sentence = key.split(Config.get_config("delimiter_key"))
             uid = uid_sentence[0]
             sentence = uid_sentence[1]
             matching_sentences.append(sentence)
-            row = df[df['cord_uid'] == uid]
+            row = df[df[Config.get_config("cord_uid")] == uid]
             with open("resources/dataset/microsoft/paper_text/" + uid + ".txt") as file:
                 data = file.read()
             sentences = ModelUtils.sentence_tokenizer(data)
