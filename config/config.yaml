@@ -24,6 +24,7 @@ resources_dir_key: resources
 dataset_dir_key: dataset
 microsoft_dir_key: microsoft
 paper_text_dir_key: paper_text
+paper_sentence_text_dir_key: paper_sentence_text
 microsoft_cord_19_dataset_filepath_key: microsoft
 microsoft_cord_19_dataset_filename_key: metadata.csv
 
@@ -49,10 +50,10 @@ cpu_device_key: cpu
 cuda_device_key: cuda
 
 # Embeddings Related Config
-embeddings_path: generated_embeddings
-title_embeddings_filename: title_embeddings.pkl
-abstract_embeddings_filename: abstract_embeddings.pkl
-sentence_embeddings_filename: sentence_embeddings.pkl
+embeddings_path_key: generated_embeddings
+title_embeddings_filename_key: title_embeddings.pkl
+abstract_embeddings_filename_key: abstract_embeddings.pkl
+sentence_embeddings_filename_key: sentence_embeddings
 
 # SpaCy transformer_models
 spacy_model_name_key: en_core_web_sm
@@ -64,3 +65,11 @@ static_dir: static
 # Paper recommender system df keys
 paper_recommender_system_df_abstract_key: Abstract
 paper_recommender_system_df_url_key: Url
+
+# Formatting
+abstract_escape_key: abstract
+abstract_sub_key: Abstract
+delimiter_key: "$%%$"
+
+text_extension_key: .txt
+pickle_extension_key: .pkl
