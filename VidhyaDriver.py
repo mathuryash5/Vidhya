@@ -8,6 +8,8 @@ from transformer_models.language_model import LanguageModel
 from util.logger import LoggingUtils
 from util.model import ModelUtils
 
+Config.load_config()
+
 resources_dir = Config.get_config("resources_dir_key")
 templates_dir = Config.get_config("templates_dir_key")
 static_dir = Config.get_config("static_dir_key")
@@ -18,7 +20,6 @@ app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR)
 app.register_blueprint(vidhya_api)
 
 def vidhya_setup():
-    Config.load_config()
     LoggingUtils.setup_logger()
     LanguageModel.load_model()
     ModelUtils.setup_model_utils()
