@@ -15,25 +15,38 @@ logger_config:
     handlers: [console]
 
 # Microsoft Azure Config
-azure_container_name: covid19temp
-azure_storage_account_name: azureopendatastorage
-azure_storage_sas_token: sv=2019-02-02&ss=bfqt&srt=sco&sp=rlcup&se=2025-04-14T00:21:16Z&st=2020-04-13T16:21:16Z&spr=https&sig=JgwLYbdGruHxRYTpr5dxfJqobKbhGap8WUtKFadcivQ%3D
+azure_container_name_key: covid19temp
+azure_storage_account_name_key: azureopendatastorage
+azure_storage_sas_token_key: sv=2019-02-02&ss=bfqt&srt=sco&sp=rlcup&se=2025-04-14T00:21:16Z&st=2020-04-13T16:21:16Z&spr=https&sig=JgwLYbdGruHxRYTpr5dxfJqobKbhGap8WUtKFadcivQ%3D
 
 # Dataset Related Config
-resources_dir: resources
-dataset_dir: dataset
-microsoft_cord_19_dataset_filepath: microsoft
-microsoft_cord_19_dataset_filename: metadata.csv
+resources_dir_key: resources
+dataset_dir_key: dataset
+microsoft_dir_key: microsoft
+paper_text_dir_key: paper_text
+microsoft_cord_19_dataset_filepath_key: microsoft
+microsoft_cord_19_dataset_filename_key: metadata.csv
+
+# Paper Text Related Config
+has_pdf_parse_key: has_pdf_parse
 
 # Microsoft CORD-19 dataset key
 cord_uid_key: cord_uid
 title_key: title
 abstract_key: abstract
+full_text_file_key: full_text_file
+has_pmc_xml_parse_key: has_pmc_xml_parse
+sha_key: sha
+body_text_key: body_text
+text_key: text
+pmcid_key: pmcid
 
 # Model Related Config
-pretrained_models_path: resources/pretrained_models
-model_name: biobert-nli
-embedding_size: 768
+pretrained_models_path_key: resources/pretrained_models
+model_name_key: biobert-nli
+embedding_size_key: 768
+cpu_device_key: cpu
+cuda_device_key: cuda
 
 # Embeddings Related Config
 embeddings_path: generated_embeddings
@@ -42,8 +55,12 @@ abstract_embeddings_filename: abstract_embeddings.pkl
 sentence_embeddings_filename: sentence_embeddings.pkl
 
 # SpaCy transformer_models
-spacy_model_name: en_core_web_sm
+spacy_model_name_key: en_core_web_sm
 
 # Vidhya UI resources
 templates_dir: templates
 static_dir: static
+
+# Paper recommender system df keys
+paper_recommender_system_df_abstract_key: Abstract
+paper_recommender_system_df_url_key: Url
