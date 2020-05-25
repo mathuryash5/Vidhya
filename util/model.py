@@ -3,7 +3,7 @@ import logging
 import os
 import pickle
 import re
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures.process import ProcessPoolExecutor
 
 import numpy as np
 import pandas as pd
@@ -16,14 +16,29 @@ from transformer_models.language_model import LanguageModel
 from util.dataset import DatasetUtils
 from util.logger import LoggingUtils
 
+import traceback
 
 class ModelUtils:
 
+    nlp = None
+
     @staticmethod
     def initializer():
+        """
+        Initializer required by the multiprocessing in Windows due to spawn.
+        """
         Config.load_config()
         LoggingUtils.setup_logger()
         LanguageModel.load_model()
+        ModelUtils.setup_model_utils()
+
+    @staticmethod
+    def setup_model_utils():
+        """
+        Loads the nlp SpaCy model.
+        """
+        ModelUtils.nlp = spacy.load(Config.get_config("spacy_model_name_key"))
+        ModelUtils.nlp.max_length = 10030000
 
     @staticmethod
     def multiprocessing(func, args, workers):
@@ -33,8 +48,13 @@ class ModelUtils:
 
     @staticmethod
     def format_abstract(string):
-        abstract_pattern = re.compile(re.escape('abstract'), re.IGNORECASE)
-        return abstract_pattern.sub(' Abstract ', string)
+        """
+        Replaces abstract ->  Abstract . 
+        :param string: Input string.
+        :return: Formatted string.
+        """
+        abstract_pattern = re.compile(re.escape(Config.get_config("abstract_escape_key")), re.IGNORECASE)
+        return abstract_pattern.sub(" " + Config.get_config("abstract_sub_key") + " ", string)
 
     @staticmethod
     def get_sentence_embeddings_from_dict(uid_sentence_mapping_dict):
@@ -57,7 +77,7 @@ class ModelUtils:
         """
         if paragraph == "":
             tensor = torch.tensor((), dtype=torch.float64)
-            mean_sentence_embeddings = tensor.new_zeros(Config.get_config("embedding_size"))
+            mean_sentence_embeddings = tensor.new_zeros(Config.get_config("embedding_size_key"))
         else:
             sentence_list = ModelUtils.sentence_tokenizer(paragraph)
             sentence_embeddings_list = []
@@ -87,55 +107,56 @@ class ModelUtils:
         :return: list of sentences.
         """
         sentence_list = []
-        nlp = spacy.load(Config.get_config("spacy_model_name"))
-        nlp.max_length = 10030000
-        doc = nlp(string)
+        doc = ModelUtils.nlp(string)
         for index, token in enumerate(doc.sents):
             sentence_list.append(token.text)
         return sentence_list
 
     @staticmethod
     def generate_sentence_embeddings_from_file(filename):
-        filepath = "resources\\dataset\\microsoft\\paper_text\\" + filename
-        with open(filepath, "r", encoding="utf8") as file:
+        """
+        Generates sentence embedding dict from a file.
+        key -> filename$%%$sentence
+        value -> sentence embedding
+        :param filename: filepath.
+        :return: sentence embedding dict.
+        """
+        resources_dir = Config.get_config("resources_dir_key")
+        dataset_dir = Config.get_config("dataset_dir_key")
+        microsoft_dir = Config.get_config("microsoft_dir_key")
+        paper_sentence_text_dir = Config.get_config("paper_sentence_text_dir_key")
+        dir = os.path.join(resources_dir, dataset_dir, microsoft_dir, paper_sentence_text_dir)
+        filepath = os.path.join(dir, filename)
+        with open(filepath, "r", encoding="utf-8") as file:
             data = file.read()
             file.close()
-        ret_list = []
+        sentence_embedding_dict = dict()
         if data == "":
-            logging.debug("File : {} does not contain any content. Skipping file".format(filename))
-            return ret_list
+            pass
         else:
-            logging.info("Sent tokenize")
-            sentence_list = ModelUtils.sentence_tokenizer(data)
-            logging.info("Sent tokenize over")
-            key_sentence_mapping = []
+            sentence_list = data.split("\n")
             for sentence in sentence_list:
-                key = filename[:-4] + "$%%$" + sentence
-                key_sentence_mapping.append([key, sentence])
-            ret_list = ModelUtils.multiprocessing(LanguageModel.get_sentence_embedding_dict_from_sentence,
-                                                                             key_sentence_mapping, 2)
-            logging.debug("File : {} generated embedding".format(filename))
-
-        return ret_list
+                if sentence.strip() != "":
+                    key = filename[:-4] + Config.get_config("delimiter_key") + sentence
+                    sentence_embedding_dict[key] = LanguageModel.get_sentence_embeddings_from_sentence(sentence)
+        return sentence_embedding_dict
 
     @staticmethod
     def generate_and_store_embeddings():
         """
         Generate and store sentence embedding for title + abstract.
         """
-        # these functions should be in some other file
-        # load the model once and not on every function call
-        resources_dir = Config.get_config("resources_dir")
-        embeddings_path = Config.get_config("embeddings_path")
-        title_embeddings_filename = Config.get_config("title_embeddings_filename")
-        abstract_embeddings_filename = Config.get_config("abstract_embeddings_filename")
-        sentence_embeddings_filemame = Config.get_config("sentence_embeddings_filename")
+        resources_dir = Config.get_config("resources_dir_key")
+        embeddings_path = Config.get_config("embeddings_path_key")
+        title_embeddings_filename = Config.get_config("title_embeddings_filename_key")
+        abstract_embeddings_filename = Config.get_config("abstract_embeddings_filename_key")
+        sentence_embeddings_filename = Config.get_config("sentence_embeddings_filename_key")
         title_embeddings_path = os.path.join(resources_dir, embeddings_path, title_embeddings_filename)
         abstract_embeddings_path = os.path.join(resources_dir, embeddings_path, abstract_embeddings_filename)
-        sentence_embeddings_path = os.path.join(resources_dir, embeddings_path, sentence_embeddings_filemame)
+        sentence_embeddings_path = os.path.join(resources_dir, embeddings_path, sentence_embeddings_filename)
         dataset_df = DatasetUtils.get_microsoft_cord_19_dataset()
-        dataset_df['title'].map(ModelUtils.format_abstract)
-        dataset_df['abstract'].map(ModelUtils.format_abstract)
+        dataset_df[Config.get_config("title_key")].map(ModelUtils.format_abstract)
+        dataset_df[Config.get_config("abstract_key")].map(ModelUtils.format_abstract)
         if os.path.exists(title_embeddings_path):
             logging.info("Microsoft CORD-19 dataset title embeddings have already been generated.")
         else:
@@ -169,19 +190,26 @@ class ModelUtils:
             logging.info("Microsoft CORD-19 dataset sentence embeddings have already been generated")
         else:
             logging.info("Generating text embeddings for Microsoft CORD-19 dataset ....")
-            files = os.listdir("resources\\dataset\\microsoft\\paper_text")
-            uid_sentence_embedding_mapping_list = []
-            uid_sentence_embedding_mapping_list.extend(ModelUtils.multiprocessing(
-                ModelUtils.generate_sentence_embeddings_from_file, files, 2))
-
-            # for file in files:
-            #     logging.debug("Call 1")
-            #     uid_sentence_embedding_mapping_list.extend(ModelUtils.generate_sentence_embeddings_from_file(file))
-            #     logging.debug("Call 2")
-            logging.info("Generated text embeddings for Microsoft CORD-19 dataset ....")
-            uid_sentence_embedding_mapping_list = list(filter(None, uid_sentence_embedding_mapping_list))
-            ModelUtils.write_to_pickle_file(sentence_embeddings_path, uid_sentence_embedding_mapping_list)
-
+            resources_dir = Config.get_config("resources_dir_key")
+            dataset_dir = Config.get_config("dataset_dir_key")
+            microsoft_dir = Config.get_config("microsoft_dir_key")
+            paper_sentence_text_dir = Config.get_config("paper_sentence_text_dir_key")
+            dir = os.path.join(resources_dir, dataset_dir, microsoft_dir, paper_sentence_text_dir)
+            os.mkdir(sentence_embeddings_path)
+            files = os.listdir(dir)
+            for file in files:
+                try:
+                    output_pkl_filename = file.split(Config.get_config("text_extension_key"))[0] + Config.get_config("pickle_extension_key")
+                    output_pkl_filepath = os.path.join(sentence_embeddings_path, output_pkl_filename)
+                    if os.path.exists(output_pkl_filepath):
+                        continue
+                    sentence_embeddings_mapping_dict = ModelUtils.generate_sentence_embeddings_from_file(file)
+                    if sentence_embeddings_mapping_dict:
+                        print("Writing path = {}".format(output_pkl_filepath))
+                        ModelUtils.write_to_pickle_file(output_pkl_filepath, sentence_embeddings_mapping_dict)
+                except Exception as e:
+                    print("Error occurred while generating sentence embeddings for File = {}. Skipping.".format(file))
+                    traceback.print_exc()
 
     @staticmethod
     def get_similar_sentences(query_embedding, corpus_embedding_dict):
