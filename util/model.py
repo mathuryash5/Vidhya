@@ -347,41 +347,68 @@ class ModelUtils:
                                                              number_of_similar_papers)
 
     @staticmethod
+    def convert_files_to_sentence_embedding(filepath):
+        resources_dir = Config.get_config("resources_dir_key")
+        generated_embeddings_dir = Config.get_config("embeddings_path_key")
+        sentence_embeddings_filename = Config.get_config("sentence_embeddings_filename_key")
+        sentence_embeddings_filepath = os.path.join(resources_dir, generated_embeddings_dir, sentence_embeddings_filename)
+        files = os.listdir(filepath)
+        sentence_embeddings_dict = dict()
+        logging.debug("Coverting individual pkl files to sentence embedding pkl file ...")
+        for file in files:
+            pkl_filepath = os.path.join(filepath, file)
+            with (open(pkl_filepath, "rb")) as f:
+                data = pickle.load(f)
+                sentence_embeddings_dict.update(data)
+        ModelUtils.write_to_pickle_file(sentence_embeddings_filepath, sentence_embeddings_dict)
+        logging.debug("Coverting individual pkl files to sentence embedding pkl file completed ...")
+
+    @staticmethod
+    def load_generated_embeddings_for_sentence_embeddings(path):
+        with (open(path, "rb")) as file:
+            data = pickle.load(file)
+        return data
+
+    @staticmethod
     def get_answer_similarity(query, number_of_answers=10):
         resources_folder = Config.get_config("resources_dir_key")
         embeddings_folder = Config.get_config("embeddings_path_key")
-        sentence_embeddings_filename = Config.get_config("sentence_embedding_filename_key")
-        sentence_embeddings_path = os.path.join(resources_folder, embeddings_folder, sentence_embeddings_filename)
-
+        sentence_embeddings_dir = Config.get_config("sentence_embeddings_dir_key")
+        sentence_embeddings_filename = Config.get_config("sentence_embeddings_filename_key")
+        sentence_embeddings_filepath = os.path.join(resources_folder, embeddings_folder, sentence_embeddings_filename)
+        if os.path.exists(sentence_embeddings_filepath):
+            logging.debug("Sentence embeddings already generated.")
+        else:
+            path = os.path.join(resources_folder, embeddings_folder, sentence_embeddings_dir)
+            ModelUtils.convert_files_to_sentence_embedding(path)
         query_embedding = LanguageModel.get_sentence_embeddings_from_sentence(query)
-        all_sentences_embeddings = ModelUtils.load_generated_embeddings(sentence_embeddings_path)
-        all_sentence_distances = ModelUtils.get_similar_sentences([query_embedding.numpy()],
-                                                                  all_sentences_embeddings)
+        all_sentences_embeddings = ModelUtils.load_generated_embeddings_for_sentence_embeddings(sentence_embeddings_filepath)
+        all_sentence_distances = ModelUtils.get_similar_sentences([query_embedding.numpy()], all_sentences_embeddings)
         df = ModelUtils.get_top_n_similar_answers(all_sentence_distances, number_of_answers)
         return df
 
     @staticmethod
     def get_top_n_similar_answers(all_sentence_distances, number_of_answers):
-
-        all_sentence_distances_mapping = [(uid, distance.tolist()[0]) for uid, distance in
-                                          all_sentence_distances.items()]
+        all_sentence_distances_mapping = [(uid, distance.tolist()[0]) for uid, distance in all_sentence_distances.items()]
         sorted_all_sentence_distances_mapping = sorted(all_sentence_distances_mapping,
                                                        key=lambda x: x[1])
-
         df = DatasetUtils.get_microsoft_cord_19_dataset()
         sorted_all_sentence_distances_mapping = sorted_all_sentence_distances_mapping[:number_of_answers]
         similar_papers = []
         matching_sentences = []
         resources_dir = Config.get_config("resources_dir_key")
-        dataset_dir = Config.get_config("dataset_key")
-        microsoft_dir = Config.get_config("microsoft_key")
+        dataset_dir = Config.get_config("dataset_dir_key")
+        microsoft_dir = Config.get_config("microsoft_dir_key")
+        paper_text_dir = Config.get_config("paper_text_dir_key")
+        dir = os.path.join(resources_dir, dataset_dir, microsoft_dir, paper_text_dir)
         for key, score in sorted_all_sentence_distances_mapping:
             uid_sentence = key.split(Config.get_config("delimiter_key"))
             uid = uid_sentence[0]
             sentence = uid_sentence[1]
             matching_sentences.append(sentence)
-            row = df[df[Config.get_config("cord_uid")] == uid]
-            with open("resources/dataset/microsoft/paper_text/" + uid + ".txt") as file:
+            print("UID = {}".format(uid))
+            row = df[df[Config.get_config("cord_uid_key")] == uid]
+            with open(os.path.join(dir, uid + ".txt"), "r", encoding="utf-8") as file:
                 data = file.read()
             sentences = ModelUtils.sentence_tokenizer(data)
             sentence_index = sentences.index(sentence)
