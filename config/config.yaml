@@ -55,7 +55,8 @@ cuda_device_key: cuda
 embeddings_path_key: generated_embeddings
 title_embeddings_filename_key: title_embeddings.pkl
 abstract_embeddings_filename_key: abstract_embeddings.pkl
-sentence_embeddings_filename_key: sentence_embeddings
+sentence_embeddings_dir_key: sentence_embeddings
+sentence_embeddings_filename_key: sentence_embeddings.pkl
 
 # SpaCy transformer_models
 spacy_model_name_key: en_core_web_sm

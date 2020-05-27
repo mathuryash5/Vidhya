@@ -119,8 +119,16 @@ body {
     cursor: pointer;
 }
 
+#paper-recommender-system #paper-recommender-system-search-query {
+    margin-top: 50px;
+    margin-left: 100px;
+    margin-right: 100px;
+}
+
 #paper-recommender-system #paper-recommender-system-result {
-    margin: 100px;
+    margin-left: 100px;
+    margin-right: 100px;
+    margin-bottom: 100px;
 }
 
 #paper-recommender-system #paper-recommender-system-result th {
@@ -131,6 +139,99 @@ body {
 }
 
 #paper-recommender-system #paper-recommender-system-result td {
+    color: black;
+    text-align: left;
+}
+
+/** Q A System styling **/
+
+/* Paper recommender system styling */
+#q-a-system .search-bar-heading h1 {
+    color: whitesmoke;
+    font-weight: lighter;
+}
+
+#q-a-system .outside-border {
+    border-color: white !important;
+}
+
+#q-a-system #q-a-system-search-bar-dropdown-button {
+    border-radius: 0%;
+}
+
+#q-a-system .dropdown.dropdown-lg .dropdown-menu {
+    margin-top: -1px;
+    padding: 6px 20px;
+}
+
+@media screen and (min-width: 768px) {
+    #q-a-system .dropdown.dropdown-lg {
+        position: static !important;
+    }
+    #q-a-system .dropdown.dropdown-lg .dropdown-menu {
+        min-width: 400px;
+    }
+}
+
+#q-a-system .slidecontainer {
+    width: 100%;
+}
+
+#q-a-system .slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+#q-a-system .slider:hover {
+    opacity: 1;
+}
+
+#q-a-system .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: black;
+    cursor: pointer;
+}
+
+#q-a-system .slider::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: black;
+    cursor: pointer;
+}
+
+#q-a-system #q-a-system-search-query {
+    margin-top: 50px;
+    margin-left: 100px;
+    margin-right: 100px;
+
+}
+
+#q-a-system #q-a-system-result {
+    margin-left: 100px;
+    margin-right: 100px;
+    margin-bottom: 100px;
+}
+
+#q-a-system #q-a-system-result th {
+    color: black;
+    font-weight: bold;
+    text-align: left;
+    background-color: #e9ecef;
+}
+
+#q-a-system #q-a-system-result td {
     color: black;
     text-align: left;
 }

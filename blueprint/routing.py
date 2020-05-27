@@ -38,19 +38,29 @@ def get_paper_recommeder_system_search_result():
     user_input_search_string = user_input["paper-recommender-system-user-input-string"]
     user_input_number_of_results = int(user_input["paper-recommender-system-user-input-result-count"])
     user_title_weight = int(user_input["paper-recommender-system-user-input-result-weight"])/100
-    vidhya_api.logger.error("user_input_search_string = {}".format(user_input_search_string))
-    vidhya_api.logger.error("user_input_number_of_results = {}".format(user_input_number_of_results))
-    vidhya_api.logger.error("user_title_weight = {}".format(user_title_weight))
-    # df = pd.DataFrame(data=[["87%","Coronavirus eruption in Wuhan, China","https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_html.html"],["83.4%","Rhinovirus", "https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_html.html"]])
-    # df.columns = ["Similarity", "Abstract", "URL"]
     df = ModelUtils.get_similar_papers_wrappers(user_input_search_string, title_weights=user_title_weight,
                                                  abstract_weights=1-user_title_weight,
                                                 number_of_similar_papers=user_input_number_of_results)
     df = FormatUtils.paper_recommender_system_formatter(df)
-    paper_recommender_search_result = df.to_html(classes=["table", "table-bordered", "table-light", "table-hover"],
+    paper_recommender_search_result = df.to_html(table_id="table", classes=["table", "table-bordered", "table-light", "table-hover", "table-striped"],
     index=False)
     paper_recommender_search_result = unescape(paper_recommender_search_result)
     if user_input_search_string.strip() == "":
         return render_template("index.html")
     else:
-        return render_template("index.html", paper_recommender_search_result=paper_recommender_search_result, paper_recommender_system_search_query=user_input_search_string)
+        return render_template("index.html", paper_recommender_search_result=paper_recommender_search_result, paper_recommender_system_search_query=user_input_search_string.strip())
+
+@vidhya_api.route("/q-a-system/search", methods=["POST"])
+def get_q_a_system_search_result():
+    user_input = request.form
+    user_input_search_string = user_input["q-a-system-user-input-string"]
+    user_input_number_of_results = int(user_input["q-a-system-user-input-result-count"])
+    df = ModelUtils.get_answer_similarity(user_input_search_string, user_input_number_of_results)
+    q_a_search_result = df.to_html(table_id="table",
+                                                 classes=["table", "table-bordered", "table-light", "table-hover",
+                                                          "table-striped"],
+                                                 index=False)
+    if user_input_search_string.strip() == "":
+        return render_template("intex.html")
+    else:
+        return render_template("index.html", q_a_search_result=q_a_search_result, q_a_system_search_query=user_input_search_string.strip())

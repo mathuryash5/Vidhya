@@ -12,14 +12,45 @@ $(document).ready(function() {
     if (dynamicContent == 'knowledge-graph-system') {
         $('#knowledge-graph-system').show();
     }
-    else if (dynamicContent == 'paper-recommender-system' || dynamicContent == 'search') {
+    else if (dynamicContent == 'paper-recommender-system') {
         $('#paper-recommender-system').show();
+        // pagination
+        $('#table').DataTable( {
+        "pagingType": "full_numbers"
+        } );
     }
     else if (dynamicContent == 'q-a-system') {
         $('#q-a-system').show();
+        // pagination
+        $('#table').DataTable( {
+        "pagingType": "full_numbers"
+        } );
     }
     else if (dynamicContent == 'about-us') {
         $('#about-us').show();
+    }
+    else if (dynamicContent == 'search') {
+        system_split = window.location.pathname.split("/");
+        system = system_split[system_split.length-2]
+        console.log("printing system")
+        console.log(system)
+        if (system == 'paper-recommender-system') {
+            $('#paper-recommender-system').show();
+            // pagination
+            $('#table').DataTable( {
+            "pagingType": "full_numbers"
+            } );
+        }
+        else if (system == 'q-a-system') {
+            $('#q-a-system').show();
+            // pagination
+            $('#table').DataTable( {
+            "pagingType": "full_numbers"
+            } );
+        }
+        else {
+            $('#homepage').show();
+        }
     }
     else {
         $('#homepage').show();
@@ -40,3 +71,18 @@ window.onload = function() {
     }
 
   }
+
+function myFunction(count) {
+    var dots = document.getElementById("dots" + count);
+    var moreText = document.getElementById("more" + count);
+    var btnText = document.getElementById("myBtn" + count);
+    if (dots.style.display === "none") {
+        dots.style.display = "inline";
+        btnText.innerHTML = "Read more";
+        moreText.style.display = "none";
+    } else {
+        dots.style.display = "none";
+        btnText.innerHTML = "Read less";
+        moreText.style.display = "inline";
+    }
+}
