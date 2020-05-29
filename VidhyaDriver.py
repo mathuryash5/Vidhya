@@ -4,6 +4,7 @@ from flask import Flask
 
 from blueprint.routing import vidhya_api
 from config.config import Config
+from gremlin.azure_gremlin import MicrosoftAzureCosmosDBGremlinAPI
 from transformer_models.language_model import LanguageModel
 from util.logger import LoggingUtils
 from util.model import ModelUtils
@@ -29,11 +30,10 @@ def vidhya_setup():
     LoggingUtils.setup_logger()
     LanguageModel.load_model()
     ModelUtils.setup_model_utils()
+    MicrosoftAzureCosmosDBGremlinAPI.setup_gremlin()
 
 if __name__ == "__main__":
     vidhya_setup()
-    # df = ModelUtils.get_answer_similarity('How does Chikungunya virus evolve?', 10)
-    # df.to_csv("F:\\Hackathon\\Vidhya\\resources\\dataset\\result.csv")
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     app.run(debug=True)
