@@ -1,12 +1,11 @@
 /* Main content styling */
 body {
-    background-color: #242424;
-    color: whitesmoke;
+    background-color: #F0F0F0;
+    color: black;
 }
 
 /* Side navbar styling */
 #sidebar-wrapper {
-    background-color: #171717;
     min-height: 100vh;
     margin-left: -15rem;
     -webkit-transition: margin .25s ease-out;
@@ -22,15 +21,7 @@ body {
 }
 
 #sidebar-wrapper .list-group {
-    width: 15rem;
-}
-
-#sidebar-wrapper .list-group .list-group-item {
-    background-color: #171717;
-    border-color: #585858;
-    border-width: thin;
-    color: white;  
-    font-weight: lighter;
+    width: 13rem;
 }
 
 #page-content-wrapper {
@@ -55,12 +46,12 @@ body {
 
 /* Paper recommender system styling */
 #paper-recommender-system .search-bar-heading h1 {
-    color: whitesmoke;
+    color: #404040;
     font-weight: lighter;
 }
 
 #paper-recommender-system .outside-border {
-    border-color: white !important;
+    border-color: aqua !important;
 }
 
 #paper-recommender-system #paper-recommender-system-search-bar-dropdown-button {
@@ -151,7 +142,7 @@ body {
 
 /* Paper recommender system styling */
 #q-a-system .search-bar-heading h1 {
-    color: whitesmoke;
+    color: #404040;;
     font-weight: lighter;
 }
 
@@ -243,10 +234,10 @@ body {
 /** Knowledge Graph System Styling **/
 /* Paper recommender system styling */
 #knowledge-graph-system .search-bar-heading h1 {
-    color: whitesmoke;
+    color: #404040;;
     font-weight: lighter;
 }
 
 .node {}
 
-.link { stroke: #999; stroke-opacity: .6; stroke-width: 1px; }
+.link { stroke: #999; stroke-opacity: .8; stroke-width: 1px; }

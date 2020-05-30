@@ -34,22 +34,22 @@
 
     <body>
 
-      <!--
-      <nav class="navbar navbar-expand-lg navbar-light bg-light" id="header">
-        <div class="sidebar-heading">Vidhya</div>
+      <nav class="navbar navbar-expand-lg navbar-light bg-primary" id="header">
+        <div class="sidebar-heading">
+            <span style="color: white;"><b>Vidhya</b> A tool for medical professionals and researchers in their fight against COVID-19</span>
+        </div>
       </nav>
-      -->
 
       <!-- Entire div container -->
       <div class="d-flex" id="main-wrapper">
 
         <!-- Sidebar navigation -->
-        <div class="border-right border-dark" id="sidebar-wrapper">
+        <div class="border-right border-right bg-light" id="sidebar-wrapper">
           <div class="list-group list-group-flush">
-            <a href="http://127.0.0.1:5000/knowledge-graph-system" class="list-group-item list-group-item-action">Knowledge Graph</a>
-            <a href="http://127.0.0.1:5000/paper-recommender-system" class="list-group-item list-group-item-action">Paper Recommender</a>
-            <a href="http://127.0.0.1:5000/q-a-system" class="list-group-item list-group-item-action">Q/A System</a>
-            <a href="http://127.0.0.1:5000/about-us" class="list-group-item list-group-item-action">About us</a>
+            <a href="http://127.0.0.1:5000/knowledge-graph-system" class="list-group-item list-group-item-action list-group-item-light">Knowledge Graph</a>
+            <a href="http://127.0.0.1:5000/paper-recommender-system" class="list-group-item list-group-item-action list-group-item-light">Paper Recommender</a>
+            <a href="http://127.0.0.1:5000/q-a-system" class="list-group-item list-group-item-action list-group-item-light">AskVidhya</a>
+            <a href="http://127.0.0.1:5000/about-us" class="list-group-item list-group-item-action list-group-item-light">About us</a>
           </div>
         </div>
 
@@ -98,9 +98,9 @@
             <div class="col-md-4 offset-md-4 mt-5 border pt-3" id="paper-recommender-system-search-bar-border-div">
               <form action="/paper-recommender-system/search" method="POST">
                 <div class="input-group mb-3" id="paper-recommender-system-search-bar-div">
-                  <input type="text" class="form-control" id="paper-recommender-system-search-bar-user-input-string" name="paper-recommender-system-user-input-string" placeholder="Search by title" required>
+                  <input type="text" class="form-control" id="paper-recommender-system-search-bar-user-input-string" name="paper-recommender-system-user-input-string" placeholder="Search for papers" required>
                   <div class="input-group-append" id="paper-recommender-system-search-bar-submit-button-div">
-                    <button type="submit" class="btn" id="paper-recommender-system-search-bar-submit-button">
+                    <button type="submit" class="btn btn-dark" id="paper-recommender-system-search-bar-submit-button">
                       <i class="fa fa-search"></i>
                     </button>
                   </div>
@@ -155,7 +155,7 @@
                 <div class="input-group mb-3" id="q-a-system-search-bar-div">
                   <input type="text" class="form-control" id="q-a-system-search-bar-user-input-string" name="q-a-system-user-input-string" placeholder="Ask anything ?" required>
                   <div class="input-group-append" id="q-a-system-search-bar-submit-button-div">
-                    <button type="submit" class="btn" id="q-a-system-search-bar-submit-button">
+                    <button type="submit" class="btn btn-dark" id="q-a-system-search-bar-submit-button">
                       <i class="fa fa-search"></i>
                     </button>
                   </div>
