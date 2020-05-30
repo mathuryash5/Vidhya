@@ -17,11 +17,29 @@ from transformer_models.language_model import LanguageModel
 from util.dataset import DatasetUtils
 from util.logger import LoggingUtils
 
+import faiss
+
 
 class ModelUtils:
 
     nlp = None
+    index_to_key_mapping = None
+    embeddings = None
+    index = None
+    dimensions = 768
 
+    @staticmethod
+    def setup_model_utils():
+        """
+        Loads the nlp SpaCy model.
+        """
+        ModelUtils.nlp = spacy.load(Config.get_config("spacy_model_name_key"))
+        ModelUtils.nlp.max_length = 10030000
+        ModelUtils.generate_embeddings_matrix()
+        ModelUtils.index = faiss.IndexFlatIP(ModelUtils.dimensions)
+        faiss.normalize_L2(ModelUtils.embeddings)
+        ModelUtils.index.add(ModelUtils.embeddings)
+    
     @staticmethod
     def initializer():
         """
@@ -31,14 +49,6 @@ class ModelUtils:
         LoggingUtils.setup_logger()
         LanguageModel.load_model()
         ModelUtils.setup_model_utils()
-
-    @staticmethod
-    def setup_model_utils():
-        """
-        Loads the nlp SpaCy model.
-        """
-        ModelUtils.nlp = spacy.load(Config.get_config("spacy_model_name_key"))
-        ModelUtils.nlp.max_length = 10030000
 
     @staticmethod
     def multiprocessing(func, args, workers):
@@ -370,6 +380,24 @@ class ModelUtils:
         return data
 
     @staticmethod
+    def generate_embeddings_matrix():
+        resources_folder = Config.get_config("resources_dir_key")
+        embeddings_folder = Config.get_config("embeddings_path_key")
+        sentence_embeddings_filename = Config.get_config("sentence_embeddings_filename_key")
+        sentence_embeddings_path = os.path.join(resources_folder, embeddings_folder, sentence_embeddings_filename)
+        all_sentences_embeddings = ModelUtils.load_generated_embeddings_for_sentence_embeddings(sentence_embeddings_path)
+        logging.debug(type(all_sentences_embeddings))
+        index_to_key_mapping = dict()
+        embeddings = np.empty(shape=[0, 768])
+        count = 0
+        for key, sentence_embeddings in all_sentences_embeddings.items():
+            index_to_key_mapping[count] = key
+            embeddings = np.vstack((embeddings, sentence_embeddings))
+            count += 1
+        ModelUtils.index_to_key_mapping = index_to_key_mapping
+        ModelUtils.embeddings = embeddings.astype('float32')
+
+    @staticmethod
     def get_answer_similarity(query, number_of_answers=10):
         resources_folder = Config.get_config("resources_dir_key")
         embeddings_folder = Config.get_config("embeddings_path_key")
@@ -381,35 +409,36 @@ class ModelUtils:
         else:
             path = os.path.join(resources_folder, embeddings_folder, sentence_embeddings_dir)
             ModelUtils.convert_files_to_sentence_embedding(path)
-        query_embedding = LanguageModel.get_sentence_embeddings_from_sentence(query)
-        all_sentences_embeddings = ModelUtils.load_generated_embeddings_for_sentence_embeddings(sentence_embeddings_filepath)
-        all_sentence_distances = ModelUtils.get_similar_sentences([query_embedding.numpy()], all_sentences_embeddings)
-        df = ModelUtils.get_top_n_similar_answers(all_sentence_distances, number_of_answers)
+        query_embedding = LanguageModel.get_sentence_embeddings_from_sentence(query).detach().numpy()
+        df = ModelUtils.get_top_n_similar_answers(query_embedding, number_of_answers)
         return df
 
     @staticmethod
-    def get_top_n_similar_answers(all_sentence_distances, number_of_answers):
-        all_sentence_distances_mapping = [(uid, distance.tolist()[0]) for uid, distance in all_sentence_distances.items()]
-        sorted_all_sentence_distances_mapping = sorted(all_sentence_distances_mapping,
-                                                       key=lambda x: x[1])
+    def get_top_n_similar_answers(query_embedding, number_of_answers):
+        sorted_all_sentence_distances_mapping = dict()
+        query_embedding=query_embedding[np.newaxis,:].astype('float32')
+        faiss.normalize_L2(query_embedding)
+        D, I = ModelUtils.index.search(query_embedding, number_of_answers)
+        index_list = I[0]
+        for index, distance in zip(index_list, D):
+            sorted_all_sentence_distances_mapping[ModelUtils.index_to_key_mapping[index]] = distance
         df = DatasetUtils.get_microsoft_cord_19_dataset()
-        sorted_all_sentence_distances_mapping = sorted_all_sentence_distances_mapping[:number_of_answers]
         similar_papers = []
         matching_sentences = []
         resources_dir = Config.get_config("resources_dir_key")
         dataset_dir = Config.get_config("dataset_dir_key")
         microsoft_dir = Config.get_config("microsoft_dir_key")
-        paper_text_dir = Config.get_config("paper_text_dir_key")
-        dir = os.path.join(resources_dir, dataset_dir, microsoft_dir, paper_text_dir)
-        for key, score in sorted_all_sentence_distances_mapping:
+        paper_sentence_text_dir = Config.get_config("paper_sentence_text_dir_key")
+        dir = os.path.join(resources_dir, dataset_dir, microsoft_dir, paper_sentence_text_dir)
+        for key, score in sorted_all_sentence_distances_mapping.items():
             uid_sentence = key.split(Config.get_config("delimiter_key"))
             uid = uid_sentence[0]
             sentence = uid_sentence[1]
             matching_sentences.append(sentence)
-            print("UID = {}".format(uid))
             row = df[df[Config.get_config("cord_uid_key")] == uid]
             with open(os.path.join(dir, uid + ".txt"), "r", encoding="utf-8") as file:
-                data = file.read()
+                sentences = file.readlines()
+                sentences = [x.strip() for x in sentences]
             sentences = ModelUtils.sentence_tokenizer(data)
             sentence_index = sentences.index(sentence)
             region_range = 2

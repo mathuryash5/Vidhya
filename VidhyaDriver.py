@@ -33,6 +33,8 @@ def vidhya_setup():
     LanguageModel.load_model()
     ModelUtils.setup_model_utils()
     MicrosoftAzureCosmosDBGremlinAPI.setup_gremlin()
+    df = ModelUtils.get_answer_similarity("How does Chikunguneya virus evolve?", 10)
+    print(df)
 
 if __name__ == "__main__":
     vidhya_setup()
