@@ -17,7 +17,8 @@ def get_homepage():
 
 @vidhya_api.route('/knowledge-graph-system/', methods=["GET"])
 def get_knowledge_graph_system():
-    graph, keys = MicrosoftAzureCosmosDBGremlinAPI.get_knowledge_graph()
+    graph = MicrosoftAzureCosmosDBGremlinAPI.graph
+    keys = MicrosoftAzureCosmosDBGremlinAPI.keys
     return render_template('index.html', graph=graph, keys=keys)
 
 @vidhya_api.route('/paper-recommender-system/', methods=["GET"])

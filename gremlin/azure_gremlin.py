@@ -12,6 +12,9 @@ class MicrosoftAzureCosmosDBGremlinAPI:
         "GET ALL EDGES": "g.E()"
     }
 
+    keys = None
+    graph = None
+
     @staticmethod
     def execute_traversals(query, client):
         callback = MicrosoftAzureCosmosDBGremlinAPI.client.submitAsync(MicrosoftAzureCosmosDBGremlinAPI._gremlin_traversals[query])
@@ -61,5 +64,8 @@ class MicrosoftAzureCosmosDBGremlinAPI:
                                    )
 
             logging.debug("Connecting to Microsoft Azure Gremlin API completed... ")
+            logging.debug("Collecting data from Microsoft Azure Gremlin API...")
+            MicrosoftAzureCosmosDBGremlinAPI.graph, MicrosoftAzureCosmosDBGremlinAPI.keys = MicrosoftAzureCosmosDBGremlinAPI.get_knowledge_graph()
+            logging.debug("Collecting data from Microsoft Azure Gremlin API completed...")
         except Exception as e:
             logging.debug('There was an exception: {0}'.format(e))
