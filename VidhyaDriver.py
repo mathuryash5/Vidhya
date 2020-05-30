@@ -8,6 +8,7 @@ from gremlin.azure_gremlin import MicrosoftAzureCosmosDBGremlinAPI
 from transformer_models.language_model import LanguageModel
 from util.logger import LoggingUtils
 from util.model import ModelUtils
+from storage.azure_storage_blob import MicrosoftAzureBlobStorageAPI
 
 import pandas as pd
 
@@ -28,6 +29,7 @@ app.config.update(
 
 def vidhya_setup():
     LoggingUtils.setup_logger()
+    MicrosoftAzureBlobStorageAPI.setup_storage()
     LanguageModel.load_model()
     ModelUtils.setup_model_utils()
     MicrosoftAzureCosmosDBGremlinAPI.setup_gremlin()

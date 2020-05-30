@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 import pandas as pd
-from azure.storage.blob import BlockBlobService
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, PublicAccess
 
 from config.config import Config
 
@@ -50,15 +50,19 @@ class DatasetUtils(object):
         :param dataset_filepath: location to store the dataset.
         """
         logging.info("Downloading Microsoft CORD-19 dataset ...")
-        azure_storage_account_name = Config.get_config("azure_storage_account_name_key")
-        azure_storage_sas_token = Config.get_config("azure_storage_sas_token_key")
+        conn_str = "DefaultEndpointsProtocol=https;AccountName=vidhyablobstorage;AccountKey=xqpTeFPmS1LBe6l8wT+QRuillPaieOVWqrjnANcQsWs7+DJz+ZwYWnwpmJH30k+KA139lsX3AdNViwr+U8tVsw==;EndpointSuffix=core.windows.net"
+        blob_service_client = BlobServiceClient.from_connection_string(conn_str=conn_str)
 
-        # Create a blob service
-        blob_service = BlockBlobService(account_name=azure_storage_account_name, sas_token=azure_storage_sas_token)
-        azure_container_name = Config.get_config("azure_container_name_key")
+        azure_container_name = "dataset"
+        blob_names = ["metadata.csv"]
 
-        blob_service.get_blob_to_path(container_name=azure_container_name, blob_name=dataset_filename,
-                                      file_path=dataset_filepath)
+        for blob_name in blob_names:
+            if os.path.exists(dataset_filepath):
+                logging.debug(blob_name + " already exists!")
+                continue
+            blob_client = blob_service_client.get_blob_client(container=azure_container_name, blob=blob_name)
+            with open(dataset_filepath, "wb") as blob:
+                blob.writelines([blob_client.download_blob().readall()])
         logging.info("Downloading Microsoft CORD-19 dataset completed ...")
 
     @staticmethod
