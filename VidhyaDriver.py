@@ -22,22 +22,15 @@ STATIC_DIR = os.path.join(resources_dir, static_dir)
 
 app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR)
 app.register_blueprint(vidhya_api)
-app.config.update(
-    DEBUG=True,
-    TEMPLATES_AUTO_RELOAD=True
-)
 
 def vidhya_setup():
     LoggingUtils.setup_logger()
     MicrosoftAzureBlobStorageAPI.setup_storage()
     LanguageModel.load_model()
     ModelUtils.setup_model_utils()
+    #ModelUtils.convert_files_to_sentence_embedding('resources/generated_embeddings/sentence_embeddings_1')
     MicrosoftAzureCosmosDBGremlinAPI.setup_gremlin()
-    df = ModelUtils.get_answer_similarity("How does Chikunguneya virus evolve?", 10)
-    print(df)
 
 if __name__ == "__main__":
     vidhya_setup()
-    app.jinja_env.auto_reload = True
-    app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=8000)

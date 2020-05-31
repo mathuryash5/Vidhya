@@ -365,8 +365,15 @@ class ModelUtils:
         files = os.listdir(filepath)
         sentence_embeddings_dict = dict()
         logging.debug("Coverting individual pkl files to sentence embedding pkl file ...")
+        count = 0
         for file in files:
+            count += 0
+            logging.debug("DONE = {}".format(count))
+            logging.debug("Print pkl file = {}".format(file))
             pkl_filepath = os.path.join(filepath, file)
+            size = os.stat(pkl_filepath)
+            if size.st_size == 0:
+                continue
             with (open(pkl_filepath, "rb")) as f:
                 data = pickle.load(f)
                 sentence_embeddings_dict.update(data)
@@ -420,16 +427,15 @@ class ModelUtils:
         faiss.normalize_L2(query_embedding)
         D, I = ModelUtils.index.search(query_embedding, number_of_answers)
         index_list = I[0]
-        for index, distance in zip(index_list, D):
+        for index, distance in zip(index_list, D[0]):
             sorted_all_sentence_distances_mapping[ModelUtils.index_to_key_mapping[index]] = distance
         df = DatasetUtils.get_microsoft_cord_19_dataset()
         similar_papers = []
         matching_sentences = []
         resources_dir = Config.get_config("resources_dir_key")
-        dataset_dir = Config.get_config("dataset_dir_key")
-        microsoft_dir = Config.get_config("microsoft_dir_key")
+        embeddings_path_dir = Config.get_config("embeddings_path_key")
         paper_sentence_text_dir = Config.get_config("paper_sentence_text_dir_key")
-        dir = os.path.join(resources_dir, dataset_dir, microsoft_dir, paper_sentence_text_dir)
+        dir = os.path.join(resources_dir, embeddings_path_dir, paper_sentence_text_dir)
         for key, score in sorted_all_sentence_distances_mapping.items():
             uid_sentence = key.split(Config.get_config("delimiter_key"))
             uid = uid_sentence[0]
@@ -439,13 +445,12 @@ class ModelUtils:
             with open(os.path.join(dir, uid + ".txt"), "r", encoding="utf-8") as file:
                 sentences = file.readlines()
                 sentences = [x.strip() for x in sentences]
-            sentences = ModelUtils.sentence_tokenizer(data)
             sentence_index = sentences.index(sentence)
             region_range = 2
             region_of_interest = sentences[sentence_index - region_range: sentence_index + region_range + 1]
             paragraph = " ".join(region_of_interest)
             similar_paper_metadata = [uid, row['title'].to_list()[0], row['abstract'].to_list()[0], paragraph,
-                                      row['journal'].to_list()[0], row['url'].to_list()[0], round((1 - score) * 100, 4)]
+                                      row['journal'].to_list()[0], row['url'].to_list()[0], score * 100]
             similar_papers.append(similar_paper_metadata)
 
         headers = ["CORD UID", "Title", "Abstract", "Relevant Context", "Journal", "URL", "Match Score"]
