@@ -21,7 +21,7 @@ body {
 }
 
 #sidebar-wrapper .list-group {
-    width: 13rem;
+    width: 17rem;
 }
 
 #page-content-wrapper {
@@ -240,4 +240,14 @@ body {
 
 .node {}
 
-.link { stroke: #999; stroke-opacity: .8; stroke-width: 1px; }
+.link { stroke: #999; stroke-opacity: .8; stroke-width: 3px; }
+
+.link_specific { stroke: #999; stroke-opacity: .8; stroke-width: 3px; }
+
+#table_p_r {
+    width: 100%;
+}
+
+#link-information {
+    margin-bottom: 50px;
+}

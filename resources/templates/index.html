@@ -21,6 +21,12 @@
       <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.css">
       <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
 
+      <script src="https://kit.fontawesome.com/733c06764a.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script>
+    AOS.init();
+  </script>
+
       <!-- Custom CSS style -->
       <link href= "{{ url_for('static',filename='styles/style.css') }}" rel="stylesheet">
       <!-- Custom JS script -->
@@ -46,21 +52,76 @@
         <!-- Sidebar navigation -->
         <div class="border-right border-right bg-light" id="sidebar-wrapper">
           <div class="list-group list-group-flush">
-            <a href="http://127.0.0.1:5000/knowledge-graph-system" class="list-group-item list-group-item-action list-group-item-light">Knowledge Graph</a>
-            <a href="http://127.0.0.1:5000/paper-recommender-system" class="list-group-item list-group-item-action list-group-item-light">Paper Recommender</a>
-            <a href="http://127.0.0.1:5000/q-a-system" class="list-group-item list-group-item-action list-group-item-light">AskVidhya</a>
-            <a href="http://127.0.0.1:5000/about-us" class="list-group-item list-group-item-action list-group-item-light">About us</a>
+            <a href="http://vidhya-ym-cpu.westus2.cloudapp.azure.com:5000/knowledge-graph-system" class="list-group-item list-group-item-action list-group-item-light">VidhyaDiscover</a>
+            <a href="http://vidhya-ym-cpu.westus2.cloudapp.azure.com:5000/paper-recommender-system" class="list-group-item list-group-item-action list-group-item-light">Vidhya Paper Recommender</a>
+            <a href="http://vidhya-ym-cpu.westus2.cloudapp.azure.com:5000/q-a-system" class="list-group-item list-group-item-action list-group-item-light">AskVidhya</a>
           </div>
         </div>
 
         <!-- Page Content -->
         <div id="page-content-wrapper">
 
-          <!-- Homepage -->
           <div class="dynamic-content" id="homepage">
-            <div class="search-bar-heading col-lg-12 text-center mt-5">
-              <h1>Homepage</h1>
+            <div class="container" data-aos="fade-in" data-aos-offset="200" data-aos-duration="1000"
+            data-aos-easing="ease-in-out">
+            <div class="text-center">
+              <h1 class="pt-3 pb-2 text-color-normal" style="color :#0275d8;">Vidhya</h1>
+              <h5 class="pt-3 pb-2 text-color-normal">Vidhya is a solution to generate <b>insights</b> from the large amount of <b>unstructured data</b>. It uses <b>deep learning</b> and <b>natural language processing techniques</b> to extract information from the text. It aims to help <b>researchers</b> and </b>medical professionals</b> get useful information from vast <b>unstructured data</b>.</h5>
             </div>
+          </div>
+
+
+          <!-- Projects Section ---------- To showcase your projects -->
+          <div class="container mt-5 py-5 hide-overflow">
+
+            <!-- Header For Project Section -->
+            <div data-aos="fade-in" data-aos-offset="200" data-aos-duration="1000" data-aos-easing="ease-in-out"
+              class="text-center py-3">
+              <h2 class="pt-3 pb-2 text-color-normal">Features of Vidhya</h2>
+            </div>
+
+            <!-- First Project Template -->
+            <div data-aos="fade-right" data-aos-offset="200" data-aos-duration="1000" data-aos-easing="ease-in-out"
+              class="row my-5 justify-content-center">
+              <div class="col-lg-6 col-md-7 col-sm-12 align-self-center py-3 pt-md-0 px-3 order-12">
+                <div class="card-block px-3">
+                  <h4 class="card-title"><b>VidhyaDiscover</b></h4>
+                  <p class="card-text">A Knowledge Graph to visualize relations between entities present in the Microsoft CORD-19 dataset.
+                    The graph contains seven different types of entities.
+                    Offers the ability to predict new links between entities thereby helping researchers find new relations between various entities.
+                    </p>
+                </div>
+              </div>
+            </div>
+
+
+            <!-- Second Project Template -->
+            <div data-aos="fade-left" data-aos-offset="200" data-aos-duration="1000" data-aos-easing="ease-in-out"
+              class="row my-5 justify-content-center">
+              <div class="col-lg-6 col-md-7  col-sm-12 align-self-center pt-3 py-3 pt-md-0 px-3 order-md-1 order-12">
+                <div class="card-block px-3">
+                  <h4 class="card-title"><b>Vidhya Paper Recommender</b></h4>
+                  <p class="card-text">Identifies and suggests similar relevant biomedical articles on the topic of interest.
+                    Provides top “n” relevant biomedical articles to the users.
+                    Provides a way to customize the weights of semantic search based on title of a paper or abstract of a paper.</p>
+                </div>
+              </div>
+            </div>
+
+
+              <!-- Third Project Template -->
+              <div data-aos="fade-right" data-aos-offset="200" data-aos-duration="1000" data-aos-easing="ease-in-out"
+                class="row my-5 justify-content-center">
+                <div class="col-lg-6 col-md-7 col-sm-12 align-self-center py-3 pt-md-0 px-3 order-12">
+                  <div class="card-block px-3">
+                    <h4 class="card-title"><b>AskVidhya</b></h4>
+                    <p class="card-text">AskVidhya enables both the researchers and common man to query the corpus using natural language questions and retrieve answers.
+                      AskVidhya provides provide top “n” answers along with the source biomedical article to the users</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Ending Project Section -->
           </div>
 
           <!-- Knowledge Graph System -->
@@ -85,6 +146,27 @@
                   </div>
                 </div>
               {% endif %}
+              <div class="container" style="display: none;" id="link-information">
+                <div class="list-group">
+                  <div class="list-group-item">
+                    <h5 class="list-group-item-heading" id="paper-title"></h5>
+                    <span class="glyphicon "></span><p class="list-group-item-text" id="name-of-relation"></p>
+                    <div class="span2">
+                      <a class="btn btn-primary" href="#" role="button" id="url-of-paper">Link to paper</a>     
+                    </div>
+                  </div>
+                </div>
+                <div class="container">
+                  <div class="row">
+                    <div class="col-md-8">
+                      <svg id = "graph_specific" width="700" height="600"></svg>
+                    </div>
+                    <div class="col-md-3">
+                      <svg id="legend_specific" height=300 width=450></svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -137,7 +219,7 @@
                 <p>Showing results for: {{ paper_recommender_system_search_query }}</p>
               </div>
               <!-- Paper Recommender System search result -->
-              <div id="paper-recommender-system-result" class="container">
+              <div id="paper-recommender-system-result">
                 {{ paper_recommender_search_result | safe }}
               </div>
             {% endif %}
@@ -183,18 +265,11 @@
                 <p>Showing results for: {{ q_a_system_search_query }}</p>
               </div>
               <!-- Q A  System search result -->
-              <div id="q-a-system-result" class="container">
+              <div id="q-a-system-result">
                 {{ q_a_search_result | safe }}
               </div>
             {% endif %}
 
-          </div>
-
-          <!-- About us System -->
-          <div class="dynamic-content" id="about-us">
-            <div class="search-bar-heading col-lg-12 text-center mt-5">
-              <h1>About us</h1>
-            </div>
           </div>
 
         </div>

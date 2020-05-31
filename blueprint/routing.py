@@ -31,11 +31,6 @@ def get_paper_recommeder_system():
 def get_q_a_system():
     return render_template('index.html')
 
-@vidhya_api.route('/about_us/', methods=["GET"])
-@vidhya_api.route('/about_us/search/', methods=["GET"])
-def get_about_us():
-    return render_template('index.html')
-
 @vidhya_api.route("/paper-recommender-system/search", methods=["POST"])
 def get_paper_recommeder_system_search_result():
     user_input = request.form
@@ -47,8 +42,8 @@ def get_paper_recommeder_system_search_result():
                                                 number_of_similar_papers=user_input_number_of_results)
     pandas.set_option('display.max_colwidth', 400)
     df = FormatUtils.paper_recommender_system_formatter(df)
-    paper_recommender_search_result = df.to_html(table_id="table", classes=["table", "table-bordered", "table-light", "table-hover", "table-striped"],
-    index=False)
+    paper_recommender_search_result = df.to_html(table_id="table_p_r", classes=["table", "table-bordered", "table-light", "table-hover", "table-striped"],
+    index=True)
     paper_recommender_search_result = unescape(paper_recommender_search_result)
     if user_input_search_string.strip() == "":
         return render_template("index.html")
@@ -61,11 +56,13 @@ def get_q_a_system_search_result():
     user_input_search_string = user_input["q-a-system-user-input-string"]
     user_input_number_of_results = int(user_input["q-a-system-user-input-result-count"])
     df = ModelUtils.get_answer_similarity(user_input_search_string, user_input_number_of_results)
+    print("Q/A System shape = {}".format(df.shape))
     df = FormatUtils.paper_recommender_system_formatter(df)
-    q_a_search_result = df.to_html(table_id="table-1",
+    print("Q/A System shape = {}".format(df.shape))
+    q_a_search_result = df.to_html(table_id="table_q_a",
                                                  classes=["table", "table-bordered", "table-light", "table-hover",
                                                           "table-striped"],
-                                                 index=False)
+                                                 index=True)
     q_a_search_result = unescape(q_a_search_result)
     if user_input_search_string.strip() == "":
         return render_template("intex.html")

@@ -49,7 +49,7 @@ class FormatUtils:
     def paper_recommender_system_format_url_clickable(df):
         for index, row in df.iterrows():
             url = row[Config.get_config("paper_recommender_system_df_url_key")]
-            url = '<a href="{}">{}</a>'.format(url, url)
+            url = '<div class="span2"><a class="btn btn-primary" href="{}" role="button" id="url">Link to paper</a></div>'.format(url)
             df.at[index, Config.get_config("paper_recommender_system_df_url_key")] = url
         df[Config.get_config("paper_recommender_system_df_url_key")] = df[Config.get_config("paper_recommender_system_df_url_key")].apply(unescape)
         return df

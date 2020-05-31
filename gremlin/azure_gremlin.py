@@ -28,16 +28,21 @@ class MicrosoftAzureCosmosDBGremlinAPI:
             id = vertex['id']
             name_of_entity = vertex['properties']['NameOfEntity'][0]['value']
             type_of_entity = vertex['properties']['TypeOfEntity'][0]['value'].upper()
+            cord_uid = vertex['properties']['CordUid'][0]['value']
             legend_set.add(type_of_entity)
-            vertex_dict = {'id':id, 'name_of_entity': name_of_entity, 'type_of_entity': type_of_entity}
+            vertex_dict = {'id':id, 'name_of_entity': name_of_entity, 'type_of_entity': type_of_entity, 'cord_uid': cord_uid}
             graph['nodes'].append(vertex_dict)
         for edge in edges:
+            logging.debug(edge)
             name_of_relation = edge['label']
             source = edge['inV']
             target = edge['outV']
             name_of_paper = edge['properties']['NameOfPaper']
             url_of_paper = edge['properties']['UrlOfPaper']
-            edge_dict = {'name_of_relation': name_of_relation, 'source': source, 'target': target, 'name_of_paper': name_of_paper, 'url_of_paper': url_of_paper}
+            cord_uid = edge['properties']['CordUid']
+            logging.debug(name_of_paper)
+            logging.debug(cord_uid)
+            edge_dict = {'name_of_relation': name_of_relation, 'source': source, 'target': target, 'name_of_paper': name_of_paper, 'url_of_paper': url_of_paper, 'cord_uid': cord_uid}
             graph['links'].append(edge_dict)
         legend = list(legend_set)
         return graph, legend
@@ -67,5 +72,6 @@ class MicrosoftAzureCosmosDBGremlinAPI:
             logging.debug("Collecting data from Microsoft Azure Gremlin API...")
             MicrosoftAzureCosmosDBGremlinAPI.graph, MicrosoftAzureCosmosDBGremlinAPI.keys = MicrosoftAzureCosmosDBGremlinAPI.get_knowledge_graph()
             logging.debug("Collecting data from Microsoft Azure Gremlin API completed...")
+            logging.debug(MicrosoftAzureCosmosDBGremlinAPI.graph)
         except Exception as e:
             logging.debug('There was an exception: {0}'.format(e))

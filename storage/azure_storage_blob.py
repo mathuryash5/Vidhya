@@ -88,17 +88,18 @@ class MicrosoftAzureBlobStorageAPI:
         paper_sentence_text_dir = Config.get_config("paper_sentence_text_dir_key")
         paper_sentence_path = os.path.join(resources_dir, dataset_dir, paper_sentence_text_dir)
 
-        Path(paper_sentence_path).mkdir(parents=True, exist_ok=True)
+        if not os.path.exists(paper_sentence_path):
 
-        paper_sentence_path = os.path.join(resources_dir, dataset_dir)
-        for blob_name in generator:
-            # logging.debug("Blob: {}".format(blob_name))
-            download_path = os.path.join(paper_sentence_path, blob_name.name)
-            if os.path.exists(download_path):
-                logging.debug(blob_name.name + " already exists!")
-                continue
-            blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name.name)
-            with open(download_path, "wb") as blob:
-                blob.writelines([blob_client.download_blob().readall()])
+            Path(paper_sentence_path).mkdir(parents=True, exist_ok=True)
+            paper_sentence_path = os.path.join(resources_dir, dataset_dir)
+            for blob_name in generator:
+                # logging.debug("Blob: {}".format(blob_name))
+                download_path = os.path.join(paper_sentence_path, blob_name.name)
+                if os.path.exists(download_path):
+                    logging.debug(blob_name.name + " already exists!")
+                    continue
+                blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name.name)
+                with open(download_path, "wb") as blob:
+                    blob.writelines([blob_client.download_blob().readall()])
         
         logging.debug("Downloading paper sentence texts completed...")
